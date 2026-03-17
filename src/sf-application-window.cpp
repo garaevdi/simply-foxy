@@ -16,21 +16,37 @@ ApplicationWindow::Class::init ()
   set_template_from_resource (APP_PATH "/ui/sf-application-window.ui");
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, refresh_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, profile_dd);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, overlaybar);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, layout_dd);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, corners_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_btn);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, install_btn);
 }
 
 inline void
 ApplicationWindow::init (Class *)
 {
+  theme_manager = ThemeManager::create ();
   firefox_manager = FirefoxManager::create ();
 
   init_template ();
+
+  // clang-format off
+  peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_busy (),
+    overlaybar, Granite::OverlayBar::prop_active ()
+  );
+  peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_busy (),
+    overlaybar, Granite::OverlayBar::prop_visible ()
+  );
+  // clang-format on
+
   refresh_btn->connect_clicked (
     [this] (Gtk::Button *)
     {
       this->firefox_manager->update_profiles ();
+      this->theme_manager->pull_repo ();
     }
   );
 

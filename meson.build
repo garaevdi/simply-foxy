@@ -9,5 +9,16 @@ project(
 app_id = 'io.github.garaevdi.' + meson.project_name()
 app_path = '/' + app_id.replace('.', '/')
 
+
+prefix = get_option('prefix')
+datadir = prefix / get_option('datadir')
+schemadir = datadir / 'glib-2.0' / 'schemas'
+
+gnome = import('gnome')
+
 subdir('data')
 subdir('src')
+
+gnome.post_install(
+  glib_compile_schemas: true
+)

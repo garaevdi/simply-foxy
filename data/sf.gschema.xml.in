@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schemalist>
+  <schema id="@APP_ID@.theme_manager" path="@APP_PATH@theme_manager/">
+    <key name="downloaded-sha" type="s">
+      <default>""</default>
+    </key>
+  </schema>
+
   <enum id="@APP_ID@.layout">
     <value nick="None" value="0" />
     <value nick="Elementary" value="1" />

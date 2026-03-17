@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sf-firefox-manager.hpp"
+#include "sf-theme-manager.hpp"
 
 #include <peel/Gio/Gio.h>
 #include <peel/Granite/Granite.h>
@@ -19,10 +20,15 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
 
   peel::Gtk::Button *refresh_btn;
   peel::Gtk::DropDown *profile_dd;
+  peel::Granite::OverlayBar *overlaybar;
   peel::Gtk::DropDown *layout_dd;
   peel::Gtk::Switch *corners_sw;
   peel::Gtk::Button *uninstall_btn;
+  peel::Gtk::Button *install_btn;
+
   peel::RefPtr<FirefoxManager> firefox_manager;
+  peel::RefPtr<ThemeManager> theme_manager;
+
   template <typename F>
   static void
   define_properties (F &f)
@@ -31,6 +37,9 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
     f.prop (prop_firefox_manager ())
       .get (&ApplicationWindow::get_firefox_manager)
       .set (&ApplicationWindow::set_firefox_manager);
+    f.prop (prop_theme_manager ())
+      .get (&ApplicationWindow::get_theme_manager)
+      .set (&ApplicationWindow::set_theme_manager);
     // clang-format on
   }
 
@@ -39,6 +48,12 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
 
   inline void
   vfunc_dispose ();
+
+  void
+  install_btn_clicked_cb (peel::Gtk::Button *);
+
+  void
+  uninstall_btn_clicked_cb (peel::Gtk::Button *);
 
   void
   set_firefox_manager (FirefoxManager *new_manager)
@@ -52,6 +67,18 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
     notify (prop_firefox_manager ());
   }
 
+  void
+  set_theme_manager (ThemeManager *new_manager)
+  {
+    if (theme_manager)
+    {
+      return;
+    }
+
+    theme_manager = new_manager;
+    notify (prop_theme_manager ());
+  }
+
 public:
   FirefoxManager *
   get_firefox_manager ()
@@ -59,7 +86,14 @@ public:
     return firefox_manager;
   }
 
+  ThemeManager *
+  get_theme_manager ()
+  {
+    return theme_manager;
+  }
+
   PEEL_PROPERTY (FirefoxManager, firefox_manager, "firefox-manager");
+  PEEL_PROPERTY (ThemeManager, theme_manager, "theme-manager");
 
   static ApplicationWindow *
   create (peel::Gtk::Application *app)

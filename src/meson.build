@@ -12,6 +12,8 @@ deps = [
 config_h_conf = configuration_data()
 config_h_conf.set_quoted('APP_ID', app_id)
 config_h_conf.set_quoted('APP_PATH', app_path)
+config_h_conf.set_quoted('APP_NAME', meson.project_name())
+config_h_conf.set_quoted('VERSION', meson.project_version())
 config_h = configure_file(configuration: config_h_conf, output: 'config.h')
 
 peel_gen = find_program('peel-gen')
@@ -44,11 +46,14 @@ srcs = [
   'sf-firefox-manager.cpp',
   'sf-firefox-profile.hpp',
   'sf-firefox-profile.cpp',
+  'sf-theme-manager.hpp',
+  'sf-theme-manager.cpp',
 ]
 
 executable(
   app_id,
   srcs,
+  cpp_args: ['-fcoroutines', '-fpermissive', '-std=c++20'],
   dependencies: deps,
   install: true
 )
