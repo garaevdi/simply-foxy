@@ -1,0 +1,47 @@
+app-id: io.github.garaevdi.simplyfoxy
+runtime: io.elementary.Platform
+runtime-version: "daily"
+sdk: io.elementary.Sdk
+command: io.github.garaevdi.simplyfoxy
+finish-args:
+  - "--share=ipc"
+  - "--share=network"
+  - "--socket=fallback-x11"
+  - "--socket=wayland"
+  - "--device=dri"
+  - "--filesystem=~/.mozilla/firefox/:rw"
+  - "--filesystem=~/.config/mozilla/firefox/:rw"
+  - "--filesystem=~/.var/app/org.mozilla.firefox/.mozilla/firefox/:rw"
+  - "--filesystem=~/.var/app/org.mozilla.firefox/config/mozilla/firefox/:rw"
+  - "--filesystem=~/snap/firefox/common/.mozilla/firefox/:rw"
+  - "--filesystem=~/snap/firefox/common/.config/mozilla/firefox/:rw"
+  - "--filesystem=~/.librewolf/:rw"
+  - "--filesystem=~/.config/librewolf/librewolf:rw"
+  - "--filesystem=~/.var/app/io.gitlab.librewolf-community/.librewolf/:rw"
+  - "--filesystem=~/.var/app/io.gitlab.librewolf-community/config/librewolf/librewolf/:rw"
+
+modules:
+  - name: peel
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/bugaevc/peel.git
+        branch: main
+    cleanup:
+      - "*"
+
+  - name: blueprint-compiler
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/GNOME/blueprint-compiler.git
+        branch: "v0.20.0"
+
+  - name: simplyfoxy
+    buildsystem: meson
+    build-options:
+      env:
+        - GI_GIR_PATH: "./gir"
+    sources:
+      - type: dir
+        path: "."
