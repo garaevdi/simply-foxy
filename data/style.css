@@ -1,0 +1,6 @@
+banner revealer > widget {
+  background: alpha(@accent_color, 0.2);
+  color: shade(@accent_color, 0.5);
+  border: 1px solid mix(@accent_color, white, 0.4);
+  padding: 6px;
+}

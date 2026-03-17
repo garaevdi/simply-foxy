@@ -1,0 +1,180 @@
+using Gtk 4.0;
+using Adw 1;
+using Granite 7.0;
+
+template $SfApplicationWindow: Gtk.ApplicationWindow {
+  default-height: 400;
+  default-width: 500;
+  resizable: false;
+  modal: true;
+
+  titlebar: Gtk.HeaderBar {
+    css-classes: [
+      "flat",
+    ];
+
+    [end]
+    Gtk.Button refresh_btn {
+      icon-name: "view-refresh-symbolic";
+    }
+  };
+
+  title: _("Simply Foxy");
+
+  child: Gtk.Overlay {
+    [overlay]
+    Granite.Toast toast {
+      title: "Test toast";
+    }
+
+    [overlay]
+    Granite.OverlayBar overlaybar {
+      label: _("Pulling updates");
+    }
+
+    child: Granite.Box {
+      orientation: vertical;
+
+      Adw.Banner {
+        title: _("Theme update available");
+        button-label: _("Update");
+      }
+
+      Granite.Box {
+        orientation: vertical;
+        hexpand: true;
+        vexpand: true;
+        halign: center;
+        valign: center;
+        width-request: 400;
+        child-spacing: single;
+
+        Gtk.ListBox {
+          activate-on-single-click: false;
+          show-separators: true;
+          selection-mode: none;
+
+          css-classes: [
+            "card",
+            "separators",
+            "rich-list",
+          ];
+
+          Granite.ListItem {
+            child: Granite.Box {
+              orientation: horizontal;
+              hexpand: true;
+              focusable: false;
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: start;
+                hexpand: true;
+
+                Gtk.Label {
+                  label: _("Profile");
+                }
+              }
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: end;
+
+                Gtk.DropDown profile_dd {}
+              }
+            };
+          }
+
+          Granite.ListItem {
+            child: Granite.Box {
+              focusable: false;
+              orientation: horizontal;
+              hexpand: true;
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: start;
+                hexpand: true;
+
+                Gtk.Label {
+                  label: _("Button layout");
+                }
+              }
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: end;
+
+                Gtk.DropDown layout_dd {
+                  model: Gtk.StringList {
+                    strings: [
+                      "None",
+                      "Elementary",
+                      "Elementary reversed",
+                    ];
+                  };
+                }
+              }
+            };
+          }
+
+          Granite.ListItem {
+            child: Granite.Box {
+              focusable: false;
+              orientation: horizontal;
+              hexpand: true;
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: start;
+                hexpand: true;
+
+                Gtk.Label {
+                  label: _("Rounded corners");
+                }
+              }
+
+              Granite.Box {
+                orientation: vertical;
+                valign: center;
+                halign: end;
+
+                Gtk.Switch corners_sw {}
+              }
+            };
+          }
+        }
+
+        Granite.Box {
+          orientation: horizontal;
+
+          Gtk.Button uninstall_btn {
+            css-classes: [
+              "destructive",
+            ];
+
+            sensitive: false;
+            hexpand: true;
+            halign: start;
+            label: _("Uninstall");
+          }
+
+          Gtk.Button install_btn {
+            css-classes: [
+              "suggested",
+            ];
+
+            hexpand: true;
+            halign: end;
+            label: _("Install");
+          }
+        }
+      }
+    };
+  };
+}

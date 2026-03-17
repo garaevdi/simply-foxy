@@ -1,0 +1,10 @@
+AlignAfterOpenBracket: BlockIndent
+BasedOnStyle: GNU
+BinPackArguments: true
+BreakAfterReturnType: All
+BreakBeforeBraces: Allman
+ColumnLimit: 100
+ContinuationIndentWidth: 2
+IncludeBlocks: Regroup
+IndentWidth: 2
+FixNamespaceComments: true

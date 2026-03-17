@@ -1,0 +1,5 @@
+_build
+.flatpak
+.flatpak-builder
+.clangd
+./subprojects/peel
