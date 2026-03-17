@@ -40,6 +40,10 @@ srcs = [
   'sf-application.cpp',
   'sf-application-window.hpp',
   'sf-application-window.cpp',
+  'sf-firefox-manager.hpp',
+  'sf-firefox-manager.cpp',
+  'sf-firefox-profile.hpp',
+  'sf-firefox-profile.cpp',
 ]
 
 executable(
