@@ -21,6 +21,8 @@ ApplicationWindow::Class::init ()
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, corners_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, install_btn);
+  PEEL_WIDGET_TEMPLATE_BIND_CALLBACK (ApplicationWindow, uninstall_btn_clicked_cb);
+  PEEL_WIDGET_TEMPLATE_BIND_CALLBACK (ApplicationWindow, install_btn_clicked_cb);
 }
 
 inline void
@@ -30,6 +32,11 @@ ApplicationWindow::init (Class *)
   firefox_manager = FirefoxManager::create ();
 
   init_template ();
+  RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create ();
+  css_provider->load_from_resource (APP_PATH "/style.css");
+  Gtk::StyleContext::add_provider_for_display (
+    get_display (), css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+  );
 
   // clang-format off
   peel::GObject::Object::bind_property (
@@ -91,5 +98,19 @@ ApplicationWindow::vfunc_dispose ()
 {
   dispose_template (Type::of<ApplicationWindow> ());
   parent_vfunc_dispose<ApplicationWindow> ();
+}
+
+void
+ApplicationWindow::install_btn_clicked_cb (Gtk::Button *btn)
+{
+  RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
+  theme_manager->install_theme (profile);
+}
+
+void
+ApplicationWindow::uninstall_btn_clicked_cb (Gtk::Button *btn)
+{
+  RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
+  theme_manager->uninstall_theme (profile);
 }
 } // namespace Sf

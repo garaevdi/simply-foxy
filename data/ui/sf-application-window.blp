@@ -162,6 +162,7 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
             hexpand: true;
             halign: start;
             label: _("Uninstall");
+            clicked => $uninstall_btn_clicked_cb();
           }
 
           Gtk.Button install_btn {
@@ -172,6 +173,7 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
             hexpand: true;
             halign: end;
             label: _("Install");
+            clicked => $install_btn_clicked_cb();
           }
         }
       }
