@@ -35,6 +35,7 @@ srcs = [
   resources,
   config_h,
   peel_h,
+  'log.h',
   'sf-application.hpp',
   'sf-application.cpp',
   'sf-application-window.hpp',
