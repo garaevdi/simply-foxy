@@ -1,5 +1,4 @@
 using Gtk 4.0;
-using Adw 1;
 using Granite 7.0;
 
 template $SfApplicationWindow: Gtk.ApplicationWindow {
@@ -23,24 +22,17 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
 
   child: Gtk.Overlay {
     [overlay]
-    Granite.Toast toast {
-      title: "Test toast";
+    Granite.Toast update_toast {
+      title: _("Update available");
     }
 
     [overlay]
-    Granite.OverlayBar overlaybar {
-      label: _("Pulling updates");
-    }
+    Granite.OverlayBar overlaybar {}
 
     child: Granite.Box {
       orientation: vertical;
 
-      Adw.Banner {
-        title: _("Theme update available");
-        button-label: _("Update");
-      }
-
-      Granite.Box {
+      Granite.Box content_box {
         orientation: vertical;
         hexpand: true;
         vexpand: true;

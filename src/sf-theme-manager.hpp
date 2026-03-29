@@ -12,6 +12,7 @@
 #include <peel/coro/AsyncResult.h>
 #include <peel/coro/Future.h>
 #include <peel/coro/SimpleTask.h>
+#include <peel/signal.h>
 
 namespace Sf
 {
@@ -25,7 +26,11 @@ class ThemeManager final : public peel::GObject::Object
   peel::RefPtr<peel::Gio::File> theme_dir;
   peel::RefPtr<peel::Gio::Settings> config;
 
+  static peel::Signal<ThemeManager, void ()> theme_installed_sig;
+  static peel::Signal<ThemeManager, void ()> update_available_sig;
+
   bool busy;
+  peel::String message;
   peel::String downloaded_sha;
 
   template <typename F>
@@ -36,6 +41,9 @@ class ThemeManager final : public peel::GObject::Object
     f.prop (prop_busy (), false)
       .get (&ThemeManager::get_busy)
       .set (&ThemeManager::set_busy);
+    f.prop (prop_message (), nullptr)
+      .get (&ThemeManager::get_message)
+      .set (&ThemeManager::set_message);
     f.prop (prop_downloaded_sha (), nullptr)
       .get (&ThemeManager::get_downloaded_sha)
       .set (&ThemeManager::set_downloaded_sha);
@@ -51,14 +59,20 @@ class ThemeManager final : public peel::GObject::Object
   peel::coro::Future<void>
   download_archive ();
 
-  void
-  extract_archive (peel::RefPtr<peel::Gio::File>);
+  peel::coro::Future<void>
+  extract_archive (peel::RefPtr<peel::Gio::File> file);
 
   peel::coro::Future<void>
   cleanup_data_dir ();
 
   peel::coro::Future<bool>
   find_theme_dir ();
+
+  peel::coro::Future<void>
+  actually_install_theme (peel::RefPtr<FirefoxProfile> profile);
+
+  peel::coro::Future<void>
+  actually_uninstall_theme (peel::RefPtr<FirefoxProfile> profile);
 
   void
   set_busy (bool state)
@@ -82,11 +96,31 @@ class ThemeManager final : public peel::GObject::Object
     notify (prop_downloaded_sha ());
   }
 
+  void
+  set_message (const char *new_message)
+  {
+    if (message)
+      if (peel::GLib::str_equal (message.c_str (), new_message))
+        return;
+
+    message = new_message;
+    notify (prop_message ());
+  }
+
 public:
+  PEEL_SIGNAL_CONNECT_METHOD (theme_installed, theme_installed_sig);
+  PEEL_SIGNAL_CONNECT_METHOD (update_available, update_available_sig);
+
   bool
   get_busy ()
   {
     return busy;
+  }
+
+  const char *
+  get_message ()
+  {
+    return message;
   }
 
   const char *
@@ -97,15 +131,16 @@ public:
 
   PEEL_PROPERTY (bool, busy, "busy");
   PEEL_PROPERTY (peel::String, downloaded_sha, "downloaded-sha");
+  PEEL_PROPERTY (peel::String, message, "message");
 
   peel::coro::SimpleTask
   pull_repo ();
 
   peel::coro::SimpleTask
-  install_theme (peel::RefPtr<FirefoxProfile>);
+  install_theme (peel::RefPtr<FirefoxProfile> profile);
 
   peel::coro::SimpleTask
-  uninstall_theme (peel::RefPtr<FirefoxProfile>);
+  uninstall_theme (peel::RefPtr<FirefoxProfile> profile);
 
   static peel::RefPtr<ThemeManager>
   create ()

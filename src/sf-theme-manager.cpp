@@ -8,6 +8,10 @@ using namespace peel;
 
 namespace Sf
 {
+
+Signal<ThemeManager, void ()> ThemeManager::theme_installed_sig;
+Signal<ThemeManager, void ()> ThemeManager::update_available_sig;
+
 PEEL_CLASS_IMPL (ThemeManager, "SfThemeManager", peel::GObject::Object);
 
 inline void
@@ -18,6 +22,9 @@ ThemeManager::Class::init ()
 inline void
 ThemeManager::init (Class *)
 {
+  theme_installed_sig = Signal<ThemeManager, void ()>::create ("theme-installed");
+  update_available_sig = Signal<ThemeManager, void ()>::create ("update-available");
+
   session = Soup::Session::create ();
   session->set_timeout (10);
   busy = false;
@@ -41,6 +48,7 @@ ThemeManager::init (Class *)
 coro::Future<void>
 ThemeManager::get_latest_hash ()
 {
+  set_message ("Checking for updates...");
   RefPtr<Soup::Message> message = Soup::Message::create (
     "GET", "https://api.github.com/repos/Zonnev/elementaryos-firefox-theme/commits?per_page=1"
   );
@@ -81,6 +89,8 @@ ThemeManager::get_latest_hash ()
 
   if (downloaded_sha != hash || !(co_await find_theme_dir ()))
   {
+    if (downloaded_sha != hash || downloaded_sha == "")
+      update_available_sig.emit (this);
     debug ("Downloading theme at %s", hash.c_str ());
     co_await download_archive ();
     set_downloaded_sha (hash);
@@ -94,6 +104,7 @@ ThemeManager::get_latest_hash ()
 coro::Future<void>
 ThemeManager::download_archive ()
 {
+  set_message ("Downloading theme...");
   // clang-format off
   RefPtr<Soup::Message> message = Soup::Message::create (
     "GET", "https://api.github.com/repos/Zonnev/elementaryos-firefox-theme/zipball/elementaryos-firefox-theme"
@@ -168,14 +179,15 @@ ThemeManager::download_archive ()
   co_return;
 }
 
-void
+coro::Future<void>
 ThemeManager::extract_archive (RefPtr<Gio::File> archive)
 {
-  cleanup_data_dir ();
-
+  set_message ("Unpacking theme...");
+  co_await cleanup_data_dir ();
 
   UniquePtr<GLib::Error> error;
-  String cmd = GLib::strconcat ("unzip -d ", extract_dir->get_path (), " -o ", archive->get_path ());
+  String cmd
+    = GLib::strconcat ("unzip -d ", extract_dir->get_path (), " -o ", archive->get_path ());
   debug ("Unzippign archive with the following cmd: %s", cmd.c_str ());
   GLib::spawn_command_line_sync (cmd, nullptr, nullptr, nullptr, &error);
   if (error)
@@ -187,6 +199,7 @@ ThemeManager::extract_archive (RefPtr<Gio::File> archive)
 coro::Future<void>
 ThemeManager::cleanup_data_dir ()
 {
+  set_message ("Cleaning old files...");
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> error;
 
@@ -253,20 +266,10 @@ ThemeManager::find_theme_dir ()
   co_return true;
 }
 
-coro::SimpleTask
-ThemeManager::pull_repo ()
+coro::Future<void>
+ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
 {
-  if (busy)
-    co_return;
-
-  set_busy (true);
-  co_await get_latest_hash ();
-  set_busy (false);
-}
-
-coro::SimpleTask
-ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
-{
+  set_message ("Installing theme...");
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> error;
 
@@ -279,7 +282,7 @@ ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
   {
   case 0:
     userchrome
-      = theme_dir->get_child ("Titlebar enabled").release_ref ()->get_child ("userChrome.css");
+      = theme_dir->get_child ("Titlebar Enabled").release_ref ()->get_child ("userChrome.css");
     break;
   case 1:
     userchrome = theme_dir->get_child ("Elementary").release_ref ()->get_child ("userChrome.css");
@@ -368,9 +371,10 @@ ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
   co_return;
 }
 
-coro::SimpleTask
-ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
+coro::Future<void>
+ThemeManager::actually_uninstall_theme (RefPtr<FirefoxProfile> profile)
 {
+  set_message ("Uninstalling theme...");
   if (!profile->get_has_theme ())
     co_return;
 
@@ -398,5 +402,38 @@ ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
   profile->write_config ();
 
   co_return;
+}
+
+coro::SimpleTask
+ThemeManager::pull_repo ()
+{
+  if (busy)
+    co_return;
+
+  set_busy (true);
+  co_await get_latest_hash ();
+  set_busy (false);
+}
+
+coro::SimpleTask
+ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
+{
+  if (busy)
+    co_return;
+
+  set_busy (true);
+  co_await actually_install_theme (profile);
+  set_busy (false);
+}
+
+coro::SimpleTask
+ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
+{
+  if (busy)
+    co_return;
+
+  set_busy (true);
+  co_await actually_uninstall_theme (profile);
+  set_busy (false);
 }
 } // namespace Sf

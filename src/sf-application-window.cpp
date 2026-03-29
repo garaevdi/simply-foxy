@@ -16,7 +16,9 @@ ApplicationWindow::Class::init ()
   set_template_from_resource (APP_PATH "/ui/sf-application-window.ui");
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, refresh_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, profile_dd);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, update_toast);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, overlaybar);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, content_box);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, layout_dd);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, corners_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_btn);
@@ -41,13 +43,25 @@ ApplicationWindow::init (Class *)
   // clang-format off
   peel::GObject::Object::bind_property (
     theme_manager, ThemeManager::prop_busy (),
+    content_box, Gtk::Widget::prop_sensitive (),
+    peel::GObject::BindingFlags::INVERT_BOOLEAN
+  );
+  peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_busy (),
     overlaybar, Granite::OverlayBar::prop_active ()
   );
   peel::GObject::Object::bind_property (
     theme_manager, ThemeManager::prop_busy (),
     overlaybar, Granite::OverlayBar::prop_visible ()
   );
+  peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_message (),
+    overlaybar, Granite::OverlayBar::prop_label ()
+  );
   // clang-format on
+
+  theme_manager->connect_update_available ([this] (peel::GObject::Object *source)
+                                           { update_toast->send_notification (); });
 
   refresh_btn->connect_clicked (
     [this] (Gtk::Button *)
