@@ -1,0 +1,252 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the io.github.garaevdi.simplyfoxy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Denis Garaev <garaevdi@yandex.ru>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: io.github.garaevdi.simplyfoxy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-30 12:54+0300\n"
+"PO-Revision-Date: 2026-03-30 13:10+0300\n"
+"Last-Translator: Denis Garaev <garaevdi@yandex.ru>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 50.0\n"
+
+#: data/ui/sf-application-window.blp:26
+msgid "Update available"
+msgstr "Доступно обновление"
+
+#: data/ui/sf-application-window.blp:68
+msgid "Profile"
+msgstr "Профиль"
+
+#: data/ui/sf-application-window.blp:95
+msgid "Rounded corners"
+msgstr "Закругленные углы"
+
+#: data/ui/sf-application-window.blp:121
+msgid "Uninstall"
+msgstr "Удалить"
+
+#: data/ui/sf-application-window.blp:132
+msgid "Install"
+msgstr "Установить"
+
+#: src/sf-firefox-manager.cpp:51
+#, c-format
+msgid "No profile found at %s, skipping it"
+msgstr "Профиль %s не найден, пропускаем"
+
+#: src/sf-firefox-manager.cpp:66
+#, c-format
+msgid "Couldn't enumerate files in profile directory: %s"
+msgstr "Не возможно перечислить файлы в директории профиля %s"
+
+#: src/sf-firefox-manager.cpp:77
+#, c-format
+msgid "Couldn't get files out of enumerator: %s"
+msgstr "Не возможно получить файлы из перечислятора: %s"
+
+#: src/sf-firefox-manager.cpp:101
+#, c-format
+msgid "Found profile %s at %s"
+msgstr "Найден профиль %s в %s"
+
+#: src/sf-firefox-manager.cpp:113
+#, c-format
+msgid "Couldn't close enumerator: %s"
+msgstr "Невозможно закрыть перечислсятор: %s"
+
+#: src/sf-firefox-profile.cpp:44
+#, c-format
+msgid "Creating relocatable schema with path: %s"
+msgstr "Создаем переносимую схему по пути %s"
+
+#: src/sf-theme-manager.cpp:40
+#, c-format
+msgid "Couldn't create data folder: %s"
+msgstr "Не возможно создать директорию с данными: %s"
+
+#: src/sf-theme-manager.cpp:52
+msgid "Checking for updates..."
+msgstr "Проверям обновления..."
+
+#: src/sf-theme-manager.cpp:68
+#, c-format
+msgid "Couldn't get commits information: %s"
+msgstr "Не возможно получить информацию о коммитах: %s"
+
+#: src/sf-theme-manager.cpp:73 src/sf-theme-manager.cpp:132
+#, c-format
+msgid "Wrong status code: %d %s"
+msgstr "Неправильный статусный код: %d %s"
+
+#: src/sf-theme-manager.cpp:81
+#, c-format
+msgid "Couldn't parser recieved JSON: %s"
+msgstr "Невозиожно прочитать полученный JSON: %s"
+
+#: src/sf-theme-manager.cpp:89
+#, c-format
+msgid "Got latest commit hash: %s"
+msgstr "Получен последний хэш коммита: %s"
+
+#: src/sf-theme-manager.cpp:95
+#, c-format
+msgid "Downloading theme at %s"
+msgstr "Загружаем тему в %s"
+
+#: src/sf-theme-manager.cpp:99
+msgid "Still couldn't find theme"
+msgstr "Все еще не можем найти тему"
+
+#: src/sf-theme-manager.cpp:108
+msgid "Downloading theme..."
+msgstr "Загружаем тему"
+
+#: src/sf-theme-manager.cpp:122
+msgid "Sending GET request to github..."
+msgstr "Отправляем GET запрос к github"
+
+#: src/sf-theme-manager.cpp:127
+#, c-format
+msgid "Couldn't download archive: %s"
+msgstr "Не возможно скачать архив: %s"
+
+#: src/sf-theme-manager.cpp:136
+#, c-format
+msgid "Read %zu bytes"
+msgstr "Прочитано %zu байт"
+
+#: src/sf-theme-manager.cpp:141
+msgid "Old archive already exists, trying to overwrite it..."
+msgstr "Старый архив уже существует, пытаемся перезаписать его..."
+
+#: src/sf-theme-manager.cpp:148
+#, c-format
+msgid "Couldn't replace old archive: %s"
+msgstr "Невозможно заменить старый архив: %s"
+
+#: src/sf-theme-manager.cpp:151
+msgid "Archive overwritten"
+msgstr "Архив перезаписан"
+
+#: src/sf-theme-manager.cpp:155
+msgid "Creating new file for archive..."
+msgstr "Создаем файл архива..."
+
+#: src/sf-theme-manager.cpp:162
+#, c-format
+msgid "Couldn't create archive file: %s"
+msgstr "Невозможно создать файл архива: %s"
+
+#: src/sf-theme-manager.cpp:166
+msgid "File created, trying to write data into it..."
+msgstr "Файл создан, пытаемся записать данные..."
+
+#: src/sf-theme-manager.cpp:172
+#, c-format
+msgid "Couldn't write archive file: %s"
+msgstr "Невозможно записать файл архива: %s"
+
+#: src/sf-theme-manager.cpp:175
+msgid "Data written, archive ready!"
+msgstr "Данные записанны, архив готов!"
+
+#: src/sf-theme-manager.cpp:186
+msgid "Unpacking theme..."
+msgstr "Распаковываем тему..."
+
+#: src/sf-theme-manager.cpp:192
+#, c-format
+msgid "Unzippign archive with the following cmd: %s"
+msgstr "Распаковываем архив при помощи следующей комманды: %s"
+
+#: src/sf-theme-manager.cpp:195
+#, c-format
+msgid "Couldn't unzip archive: %s"
+msgstr "Невозможно распаковать архив: %s"
+
+#: src/sf-theme-manager.cpp:197
+msgid "Unzipped archive"
+msgstr "Архив распакован"
+
+#: src/sf-theme-manager.cpp:203
+msgid "Cleaning old files..."
+msgstr "Подчищаем ненужные файлы..."
+
+#: src/sf-theme-manager.cpp:207
+msgid "Starting data directory cleanup..."
+msgstr "Начинаем очистку директории с данными"
+
+#: src/sf-theme-manager.cpp:213
+msgid "Cleanup finished"
+msgstr "Очистка завершена"
+
+#: src/sf-theme-manager.cpp:225
+msgid "No extract directory, aborting"
+msgstr "Не найдена конечная директория, отмена"
+
+#: src/sf-theme-manager.cpp:236
+#, c-format
+msgid "Coulnd't get data directory childern: %s"
+msgstr "Невозможно получить дочерние директории: %s"
+
+#: src/sf-theme-manager.cpp:243
+#, c-format
+msgid "Couldn't get list of files to find theme folder: %s"
+msgstr "Невозможно получить список файлов для поиска директории с темой: %s"
+
+#: src/sf-theme-manager.cpp:266
+msgid "Found theme directory"
+msgstr "Директория с темой найдена"
+
+#: src/sf-theme-manager.cpp:273
+msgid "Installing theme..."
+msgstr "Устанавливаем тему..."
+
+#: src/sf-theme-manager.cpp:317
+msgid "Couldn't find theme files, try to redownload the theme"
+msgstr "Невозможно найти файлы темы, попробуйте перезагрузить тему"
+
+#: src/sf-theme-manager.cpp:318
+#, c-format
+msgid "Theme dir is: %s"
+msgstr "Директория с темой: %s"
+
+#: src/sf-theme-manager.cpp:329
+#, c-format
+msgid "Couldn't create \"chrome\" directory: %s"
+msgstr "Невозможно создать директорию \"chrome\": %s"
+
+#: src/sf-theme-manager.cpp:362
+#, c-format
+msgid "Couldn't create \"user.js\" file: %s"
+msgstr "Невозможно создать файл \"user.js\": %s"
+
+#: src/sf-theme-manager.cpp:383
+#, c-format
+msgid "Couldn't write to \"user.js\" file: %s"
+msgstr "Невозможно записать файл \"user.js\": %s"
+
+#: src/sf-theme-manager.cpp:395
+msgid "Uninstalling theme..."
+msgstr "Удаляем тему"
+
+#: src/sf-theme-manager.cpp:406
+#, c-format
+msgid "Couldn't delete chrome folder: %s"
+msgstr "Невозможно удалить директорию \"chrome\": %s"
+
+#: src/sf-theme-manager.cpp:416
+#, c-format
+msgid "Couldn't delete user.js file: %s"
+msgstr "Невозможно удалить файл \"user.js\": %s"
