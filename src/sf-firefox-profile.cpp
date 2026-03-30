@@ -3,6 +3,8 @@
 #include "config.h"
 #include "log.h"
 
+#include <glib/gi18n.h>
+
 using namespace peel;
 
 // clang-format off
@@ -39,11 +41,11 @@ FirefoxProfile::init (Class *)
     {
       RefPtr<FirefoxProfile> profile = (FirefoxProfile *)obj;
       String path = GLib::strconcat (APP_PATH, "/", profile->get_profile_basename (), "/");
-      debug ("Creating relocatable schema with path: %s", path.c_str ());
+      debug (_("Creating relocatable schema with path: %s"), path.c_str ());
       profile->config = Gio::Settings::create_with_path (APP_ID ".profile", path);
 
       profile->set_theme_sha (profile->config->get_string ("theme-sha"));
-      profile->set_layout ((ButtonLayout) profile->config->get_int ("button-layout"));
+      profile->set_layout ((ButtonLayout)profile->config->get_int ("button-layout"));
       profile->set_rounded_corners (profile->config->get_boolean ("rounded-corners"));
     }
   );
@@ -53,7 +55,7 @@ void
 FirefoxProfile::write_config ()
 {
   config->set_string ("theme-sha", get_theme_sha ());
-  config->set_int ("button-layout", static_cast<int>(get_layout ()));
+  config->set_int ("button-layout", static_cast<int> (get_layout ()));
   config->set_boolean ("rounded-corners", get_rounded_corners ());
 
   notify (prop_has_theme ());

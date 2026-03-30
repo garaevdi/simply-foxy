@@ -23,8 +23,7 @@ public:
   create ()
   {
     return peel::Object::create<Application> (
-      prop_application_id (), APP_ID, prop_flags (),
-      peel::Gio::Application::Flags::DEFAULT_FLAGS
+      prop_application_id (), APP_ID, prop_flags (), peel::Gio::Application::Flags::DEFAULT_FLAGS
     );
   }
 };
