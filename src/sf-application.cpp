@@ -2,6 +2,9 @@
 
 #include "sf-application-window.hpp"
 
+#include <glib/gi18n.h>
+#include <locale.h>
+
 using namespace peel;
 
 namespace Sf
@@ -32,6 +35,10 @@ Application::vfunc_activate ()
 int
 main (int argc, char *argv[])
 {
+  setlocale(LC_ALL, "");
+  bindtextdomain(GETTEXT_DOMAIN, DATADIR "/locale");
+  bind_textdomain_codeset(GETTEXT_DOMAIN, "UTF-8");
+  textdomain(GETTEXT_DOMAIN);
   RefPtr<Sf::Application> app = Sf::Application::create ();
   return app->run (argc, argv);
 }

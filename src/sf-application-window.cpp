@@ -30,7 +30,7 @@ inline void
 ApplicationWindow::init (Class *)
 {
   theme_manager = ThemeManager::create ();
-  theme_manager->set_gtk_settings(get_settings());
+  theme_manager->set_gtk_settings (get_settings ());
   firefox_manager = FirefoxManager::create ();
 
   init_template ();

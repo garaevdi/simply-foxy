@@ -1,0 +1,12 @@
+data/ui/sf-application-window.blp
+src/log.h
+src/sf-application.hpp
+src/sf-application.cpp
+src/sf-application-window.hpp
+src/sf-application-window.cpp
+src/sf-firefox-manager.hpp
+src/sf-firefox-manager.cpp
+src/sf-firefox-profile.hpp
+src/sf-firefox-profile.cpp
+src/sf-theme-manager.hpp
+src/sf-theme-manager.cpp

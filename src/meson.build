@@ -14,6 +14,8 @@ config_h_conf.set_quoted('APP_ID', app_id)
 config_h_conf.set_quoted('APP_PATH', app_path)
 config_h_conf.set_quoted('APP_NAME', meson.project_name())
 config_h_conf.set_quoted('VERSION', meson.project_version())
+config_h_conf.set_quoted('DATADIR', datadir)
+config_h_conf.set_quoted('GETTEXT_DOMAIN', gettext_domain)
 config_h = configure_file(configuration: config_h_conf, output: 'config.h')
 
 peel_gen = find_program('peel-gen')

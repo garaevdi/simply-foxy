@@ -3,6 +3,7 @@
 #include "log.h"
 #include "sf-firefox-profile.hpp"
 
+#include <glib/gi18n.h>
 #include <string>
 
 using namespace peel;
@@ -47,7 +48,7 @@ FirefoxManager::find_profiles (Firefox fox)
   RefPtr<Gio::File> file = Gio::File::create_for_path (path);
   if (!file->query_exists (nullptr))
   {
-    debug ("No profile found at %s, skipping it", path.c_str ());
+    debug (_("No profile found at %s, skipping it"), path.c_str ());
     co_return;
   }
 
@@ -62,7 +63,7 @@ FirefoxManager::find_profiles (Firefox fox)
     = file->enumerate_children_finish (co_await async_result, &error);
   if (error)
   {
-    critical ("Couldn't enumerate files in profile directory: %s", error->message);
+    critical (_("Couldn't enumerate files in profile directory: %s"), error->message);
     co_return;
   }
 
@@ -73,7 +74,7 @@ FirefoxManager::find_profiles (Firefox fox)
     files = enumerator->next_files_finish (co_await async_result, &error);
     if (error)
     {
-      warning ("Couldn't get files out if enumerator: %s", error->message);
+      warning (_("Couldn't get files out of enumerator: %s"), error->message);
       continue;
     }
     GLib::List::foreach (
@@ -97,7 +98,7 @@ FirefoxManager::find_profiles (Firefox fox)
           {
             profile_name = GLib::strconcat (profile_name, " Nightly");
           }
-          debug ("Found profile %s at %s", profile_name.c_str (), path.c_str ());
+          debug (_("Found profile %s at %s"), profile_name.c_str (), path.c_str ());
           RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
           profiles->append (profile);
         }
@@ -109,7 +110,7 @@ FirefoxManager::find_profiles (Firefox fox)
   enumerator->close_finish (co_await async_result, &error);
   if (error)
   {
-    critical ("Couldn't close enumerator: %s", error->message);
+    critical (_("Couldn't close enumerator: %s"), error->message);
     co_return;
   }
 }

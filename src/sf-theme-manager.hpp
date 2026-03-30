@@ -85,7 +85,6 @@ class ThemeManager final : public peel::GObject::Object
       return;
 
     busy = state;
-    debug ("Is working: %s", state ? "true" : "false");
     notify (prop_busy ());
   }
 
