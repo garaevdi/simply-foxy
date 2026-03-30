@@ -1,6 +1,6 @@
 #include "sf-firefox-manager.hpp"
 
-#include "config.h"
+#include "log.h"
 #include "sf-firefox-profile.hpp"
 
 #include <string>
@@ -16,14 +16,6 @@ FirefoxManager::Class::init ()
 {
 }
 
-int
-str_equal (const void *v1, const void *v2)
-{
-  const char *string1 = (char *)v1;
-  const char *string2 = (char *)v2;
-  return strcmp (string1, string2);
-}
-
 inline void
 FirefoxManager::init (Class *)
 {
@@ -35,104 +27,101 @@ FirefoxManager::init (Class *)
   locations = {
     { GLib::strconcat (home, "/.mozilla/firefox"), "Firefox", false },
     { GLib::strconcat (home, "/.config/mozilla/firefox"), "Firefox", false },
+    { GLib::strconcat (home, "/.var/app/io.gitlab.librewolf-community/.librewolf"), "Librewolf (flatpak)", true },
     { GLib::strconcat (home, "/.var/app/org.mozilla.firefox/.mozilla/firefox"), "Firefox (flatpak)", true },
     { GLib::strconcat (home, "/.var/app/org.mozilla.firefox/config/mozilla/firefox/"), "Firefox (flatpak)", true },
     { GLib::strconcat (home, "/snap/firefox/common/.mozilla/firefox"), "Firefox (snap)", true },
     { GLib::strconcat (home, "/.librewolf"), "Librewolf", false },
-    { GLib::strconcat (home, "/.var/app/io.gitlab.librewolf-community/.librewolf"), "Librewolf (flatpak)", true },
   };
   // clang-format on
 }
 
-// Super function that idk how to split up :(
-void
-FirefoxManager::update_profiles ()
+coro::Future<void>
+FirefoxManager::find_profiles (Firefox fox)
 {
-  profiles->remove_all ();
-  for (Firefox fox : locations)
+  String path = fox.path;
+  String name = fox.name;
+  bool sandboxed = fox.sandboxed;
+
+  debug ("Trying %s", path.c_str ());
+  RefPtr<Gio::File> file = Gio::File::create_for_path (path);
+  if (!file->query_exists (nullptr))
   {
-    String path = fox.location;
-    String name = fox.name;
-    bool sandboxed = fox.sandboxed;
-    RefPtr<Gio::File> file = Gio::File::create_for_path (path);
-    if (!file->query_exists (nullptr))
+    debug ("No profile found at %s, skipping it", path.c_str ());
+    co_return;
+  }
+
+  coro::AsyncResult async_result;
+  UniquePtr<GLib::Error> error;
+
+  file->enumerate_children_async (
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, nullptr,
+    async_result.callback ()
+  );
+  RefPtr<Gio::FileEnumerator> enumerator
+    = file->enumerate_children_finish (co_await async_result, &error);
+  if (error)
+  {
+    critical ("Couldn't enumerate files in profile directory: %s", error->message);
+    co_return;
+  }
+
+  enumerator->next_files_async (5, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  UniquePtr<GLib::List> files;
+  do
+  {
+    files = enumerator->next_files_finish (co_await async_result, &error);
+    if (error)
     {
-      GLib::log (APP_ID, peel::GLib::LogLevelFlags::LEVEL_DEBUG, "No such file %s", path.c_str ());
+      warning ("Couldn't get files out if enumerator: %s", error->message);
       continue;
     }
-    file->enumerate_children_async (
-      G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, nullptr,
-      // clang-format off
-      [name, sandboxed, profiles = this->profiles]
-      (peel::GObject::Object *source, Gio::AsyncResult *res)
-      // clang-format on
+    GLib::List::foreach (
+      files,
+      [enumerator, &profile_name = name, &path, &sandboxed, profiles = this->profiles] (void *data)
       {
-        String profile_name = name;
-        UniquePtr<GLib::Error> err;
-        RefPtr<Gio::FileEnumerator> enumerator
-          = source->cast<Gio::File> ()->enumerate_children_finish (res, &err);
-        if (err)
-        {
-          GLib::log (
-            APP_ID, peel::GLib::LogLevelFlags::LEVEL_CRITICAL, "Couldn't load profiles: %s",
-            err->message
-          );
+        if (!data)
           return;
-        }
 
-        while (true)
+        RefPtr<Gio::FileInfo> info = (Gio::FileInfo *)data;
+        RefPtr<Gio::File> file = enumerator->get_child (info);
+        std::string name = info->get_name ();
+
+        if (name.find ("default-") != std::string::npos)
         {
-          UniquePtr<GLib::Error> err;
-          RefPtr<Gio::FileInfo> info = enumerator->next_file (nullptr, &err);
-          if (!info)
+          if (name.find ("esr") != std::string::npos)
           {
-            break;
+            profile_name = GLib::strconcat (profile_name, " ESR");
           }
-
-          RefPtr<Gio::File> file = enumerator->get_child (info);
-          if (err)
+          else if (name.find ("nightly") != std::string::npos)
           {
-            GLib::log (
-              APP_ID, peel::GLib::LogLevelFlags::LEVEL_CRITICAL, "Couldn't get fileinfo: %s",
-              err->message
-            );
-            continue;
+            profile_name = GLib::strconcat (profile_name, " Nightly");
           }
-
-          std::string name = info->get_name ();
-          if (name.find ("default-") != std::string::npos)
-          {
-            if (name.find ("esr") != std::string::npos)
-            {
-              profile_name = GLib::strconcat (profile_name, " ESR");
-            }
-            else if (name.find ("nightly") != std::string::npos)
-            {
-              profile_name = GLib::strconcat (profile_name, " Nightly");
-            }
-            RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
-            profiles->append (profile);
-          }
+          debug ("Found profile %s at %s", profile_name.c_str (), path.c_str ());
+          RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
+          profiles->append (profile);
         }
       }
     );
+  } while (files != nullptr);
+
+  enumerator->close_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  enumerator->close_finish (co_await async_result, &error);
+  if (error)
+  {
+    critical ("Couldn't close enumerator: %s", error->message);
+    co_return;
   }
-  profiles->sort (
-    [] (const void *a, const void *b)
-    {
-      RefPtr<FirefoxProfile> left = (FirefoxProfile *)a;
-      RefPtr<FirefoxProfile> right = (FirefoxProfile *)b;
-      UniquePtr<GLib::Error> err;
-      RefPtr<Gio::FileInfo> left_info = left->get_file ()->query_info (
-        G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, nullptr, &err
-      );
-      RefPtr<Gio::FileInfo> right_info = right->get_file ()->query_info (
-        G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, nullptr, &err
-      );
-      RefPtr<GLib::DateTime> left_edit_dt = left_info->get_modification_date_time ();
-      RefPtr<GLib::DateTime> right_edit_dt = right_info->get_modification_date_time ();
-      return left_edit_dt->compare (right_edit_dt);
-    }
-  );
+}
+
+coro::SimpleTask
+FirefoxManager::update_profiles ()
+{
+  profiles->remove_all ();
+
+  for (Firefox fox : locations)
+    find_profiles (fox);
+
+  co_return;
 }
 } // namespace Sf

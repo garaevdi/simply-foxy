@@ -5,12 +5,16 @@
 #include <peel/GObject/GObject.h>
 #include <peel/Gio/Gio.h>
 #include <peel/class.h>
+#include <peel/coro/AsyncResult.h>
+#include <peel/coro/Future.h>
+#include <peel/coro/SimpleTask.h>
 #include <vector>
 
 namespace Sf
 {
-struct Firefox {
-  peel::String location;
+struct Firefox
+{
+  peel::String path;
   peel::String name;
   bool sandboxed;
 };
@@ -49,10 +53,10 @@ class FirefoxManager final : public peel::GObject::Object
   inline void
   init (Class *);
 
-public:
-  void
-  update_profiles ();
+  peel::coro::Future<void>
+  find_profiles (Firefox fox);
 
+public:
   peel::Gio::ListStore *
   get_profiles ()
   {
@@ -60,6 +64,9 @@ public:
   }
 
   PEEL_PROPERTY (peel::Gio::ListStore, profiles, "profiles");
+
+  peel::coro::SimpleTask
+  update_profiles ();
 
   static peel::RefPtr<FirefoxManager>
   create ()
