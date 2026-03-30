@@ -6,12 +6,6 @@
     </key>
   </schema>
 
-  <enum id="@APP_ID@.layout">
-    <value nick="None" value="0" />
-    <value nick="Elementary" value="1" />
-    <value nick="Elementary Reversed" value="2" />
-  </enum>
-
   <schema id="@APP_ID@.profile">
     <key name="installed" type="b">
       <default>false</default>
@@ -19,8 +13,9 @@
     <key name="theme-sha" type="s">
       <default>""</default>
     </key>
-    <key name="button-layout" enum="@APP_ID@.layout">
-      <default>"Elementary"</default>
+    <key name="button-layout" type="i">
+      <range min="0" max="10"/>
+      <default>0</default>
     </key>
     <key name="rounded-corners" type="b">
       <default>false</default>

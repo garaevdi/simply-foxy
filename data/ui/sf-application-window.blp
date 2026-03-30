@@ -92,41 +92,6 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
                 hexpand: true;
 
                 Gtk.Label {
-                  label: _("Button layout");
-                }
-              }
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: end;
-
-                Gtk.DropDown layout_dd {
-                  model: Gtk.StringList {
-                    strings: [
-                      "None",
-                      "Elementary",
-                      "Elementary reversed",
-                    ];
-                  };
-                }
-              }
-            };
-          }
-
-          Granite.ListItem {
-            child: Granite.Box {
-              focusable: false;
-              orientation: horizontal;
-              hexpand: true;
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: start;
-                hexpand: true;
-
-                Gtk.Label {
                   label: _("Rounded corners");
                 }
               }

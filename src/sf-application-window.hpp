@@ -23,7 +23,6 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
   peel::Granite::Toast *update_toast;
   peel::Granite::OverlayBar *overlaybar;
   peel::Granite::Box *content_box;
-  peel::Gtk::DropDown *layout_dd;
   peel::Gtk::Switch *corners_sw;
   peel::Gtk::Button *uninstall_btn;
   peel::Gtk::Button *install_btn;

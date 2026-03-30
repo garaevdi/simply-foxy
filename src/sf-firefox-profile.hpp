@@ -5,6 +5,27 @@
 #include <peel/Gio/Gio.h>
 #include <peel/Gtk/Gtk.h>
 #include <peel/class.h>
+#include <peel/enum.h>
+
+namespace Sf
+{
+enum class ButtonLayout
+{
+  ELEMENTARY = 0,
+  ELEMENTARY_REVERSED = 1,
+  CLOSE_ONLY_RIGHT = 2,
+  CLOSE_ONLY_LEFT = 3,
+  ADD_MINIMIZE_LEFT = 4,
+  ADD_MINIMIZE_RIGHT = 5,
+  REPLACE_MAXIMIZE = 6,
+  WINDOWS = 7,
+  MACOS = 8,
+  UBUNTU = 9,
+  UNKNOWN = 10
+};
+}
+
+PEEL_ENUM (Sf::ButtonLayout)
 
 namespace Sf
 {
@@ -18,7 +39,7 @@ class FirefoxProfile final : public peel::GObject::Object
   bool sandboxed;
   peel::RefPtr<peel::Gio::File> file;
   peel::String theme_sha;
-  uint layout;
+  ButtonLayout layout;
   bool rounded_corners;
 
   template <typename F>
@@ -46,7 +67,7 @@ class FirefoxProfile final : public peel::GObject::Object
     f.prop (prop_theme_sha (), nullptr)
       .get (&FirefoxProfile::get_theme_sha)
       .set (&FirefoxProfile::set_theme_sha);
-    f.prop (prop_layout (), 0, 10, 0)
+    f.prop (prop_layout (), ButtonLayout::ELEMENTARY)
       .get (&FirefoxProfile::get_layout)
       .set (&FirefoxProfile::set_layout);
     f.prop (prop_rounded_corners (), false)
@@ -169,7 +190,7 @@ public:
   }
 
   void
-  set_layout (uint new_layout)
+  set_layout (ButtonLayout new_layout)
   {
     if (layout == new_layout)
       return;
@@ -178,10 +199,40 @@ public:
     notify (prop_layout ());
   }
 
-  uint
+  ButtonLayout
   get_layout ()
   {
     return layout;
+  }
+
+  const char *
+  get_theme_name ()
+  {
+    switch (layout)
+    {
+    case Sf::ButtonLayout::ELEMENTARY:
+      return "Elementary";
+    case Sf::ButtonLayout::ELEMENTARY_REVERSED:
+      return "Elementary Reversed";
+    case Sf::ButtonLayout::CLOSE_ONLY_LEFT:
+      return "Close Only Left";
+    case Sf::ButtonLayout::CLOSE_ONLY_RIGHT:
+      return "Close Only Right";
+    case Sf::ButtonLayout::ADD_MINIMIZE_LEFT:
+      return "Minimize Left";
+    case Sf::ButtonLayout::ADD_MINIMIZE_RIGHT:
+      return "Minimize Right";
+    case Sf::ButtonLayout::REPLACE_MAXIMIZE:
+      return "Replace Maximize to Minimize";
+    case Sf::ButtonLayout::WINDOWS:
+      return "Windows";
+    case Sf::ButtonLayout::MACOS:
+      return "macOS";
+    case Sf::ButtonLayout::UBUNTU:
+      return "Ubuntu";
+    default:
+      return "Titlebar Enabled";
+    }
   }
 
   void
@@ -208,7 +259,8 @@ public:
   PEEL_PROPERTY (bool, has_theme, "has-theme");
   PEEL_PROPERTY (peel::Gio::File, file, "file");
   PEEL_PROPERTY (peel::String, theme_sha, "theme-sha");
-  PEEL_PROPERTY (uint, layout, "layout");
+  PEEL_PROPERTY (ButtonLayout, layout, "layout");
+  PEEL_PROPERTY (peel::String, theme_name, "theme_name");
   PEEL_PROPERTY (bool, rounded_corners, "rounded-corners");
 
   void

@@ -278,20 +278,37 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
   RefPtr<Gio::File> flatpak = theme_dir->get_child ("flatpak.css");
 
   RefPtr<Gio::File> userchrome = nullptr;
-  switch (profile->get_layout ())
-  {
-  case 0:
-    userchrome
-      = theme_dir->get_child ("Titlebar Enabled").release_ref ()->get_child ("userChrome.css");
-    break;
-  case 1:
-    userchrome = theme_dir->get_child ("Elementary").release_ref ()->get_child ("userChrome.css");
-    break;
-  case 2:
-    userchrome
-      = theme_dir->get_child ("Elementary Reversed").release_ref ()->get_child ("userChrome.css");
-    break;
-  }
+
+  peel::String button_layout
+    = gtk_settings->get_property (Gtk::Settings::prop_gtk_decoration_layout ());
+
+  if (!button_layout)
+    profile->set_layout (ButtonLayout::UNKNOWN);
+  else if (button_layout == "close:maximize")
+    profile->set_layout (ButtonLayout::ELEMENTARY);
+  else if (button_layout == "maximize:close")
+    profile->set_layout (ButtonLayout::ELEMENTARY_REVERSED);
+  else if (button_layout == ":close")
+    profile->set_layout (ButtonLayout::CLOSE_ONLY_RIGHT);
+  else if (button_layout == "close:")
+    profile->set_layout (ButtonLayout::CLOSE_ONLY_LEFT);
+  else if (button_layout == "close,minimize:maximize")
+    profile->set_layout (ButtonLayout::ADD_MINIMIZE_LEFT);
+  else if (button_layout == "close:minimize,maximize")
+    profile->set_layout (ButtonLayout::ADD_MINIMIZE_RIGHT);
+  else if (button_layout == "close:minimize")
+    profile->set_layout (ButtonLayout::REPLACE_MAXIMIZE);
+  else if (button_layout == ":minimize,maximize,close")
+    profile->set_layout (ButtonLayout::WINDOWS);
+  else if (button_layout == "close,minimize,maximize:")
+    profile->set_layout (ButtonLayout::MACOS);
+  else if (button_layout == "close,maximize,minimized:")
+    profile->set_layout (ButtonLayout::UBUNTU);
+  else
+    profile->set_layout (ButtonLayout::UNKNOWN);
+  userchrome = theme_dir->get_child (profile->get_theme_name ())
+                 .release_ref ()
+                 ->get_child ("userChrome.css");
 
   if (!(usercontent->query_exists (nullptr) && base->query_exists (nullptr)
         && flatpak->query_exists (nullptr) && userchrome->query_exists (nullptr)))

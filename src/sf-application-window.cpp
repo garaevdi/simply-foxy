@@ -19,7 +19,6 @@ ApplicationWindow::Class::init ()
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, update_toast);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, overlaybar);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, content_box);
-  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, layout_dd);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, corners_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, install_btn);
@@ -31,6 +30,7 @@ inline void
 ApplicationWindow::init (Class *)
 {
   theme_manager = ThemeManager::create ();
+  theme_manager->set_gtk_settings(get_settings());
   firefox_manager = FirefoxManager::create ();
 
   init_template ();
@@ -60,6 +60,14 @@ ApplicationWindow::init (Class *)
   );
   // clang-format on
 
+  connect_notify (
+    ApplicationWindow::prop_display (),
+    [] (peel::GObject::Object *source, peel::GObject::ParamSpec *pspec)
+    {
+      FloatPtr<ApplicationWindow> window = (ApplicationWindow *)source;
+      window->theme_manager->set_gtk_settings (window->get_settings ());
+    }
+  );
   theme_manager->connect_update_available ([this] (peel::GObject::Object *source)
                                            { update_toast->send_notification (); });
 
@@ -91,9 +99,6 @@ ApplicationWindow::init (Class *)
       {
         binding_group->bind (
           "has-theme", uninstall_btn, "sensitive", peel::GObject::BindingFlags::DEFAULT
-        );
-        binding_group->bind (
-          "layout", layout_dd, "selected", peel::GObject::BindingFlags::BIDIRECTIONAL
         );
         binding_group->bind (
           "rounded-corners", corners_sw, "active", peel::GObject::BindingFlags::BIDIRECTIONAL

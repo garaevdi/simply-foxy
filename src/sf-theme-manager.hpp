@@ -32,6 +32,7 @@ class ThemeManager final : public peel::GObject::Object
   bool busy;
   peel::String message;
   peel::String downloaded_sha;
+  peel::RefPtr<peel::Gtk::Settings> gtk_settings;
 
   template <typename F>
   static void
@@ -47,6 +48,9 @@ class ThemeManager final : public peel::GObject::Object
     f.prop (prop_downloaded_sha (), nullptr)
       .get (&ThemeManager::get_downloaded_sha)
       .set (&ThemeManager::set_downloaded_sha);
+    f.prop (prop_gtk_settings ())
+      .get (&ThemeManager::get_gtk_settings)
+      .set (&ThemeManager::set_gtk_settings);
     // clang-format on
   }
 
@@ -129,9 +133,23 @@ public:
     return downloaded_sha;
   }
 
+  void
+  set_gtk_settings (peel::RefPtr<peel::Gtk::Settings> new_gtk_settings)
+  {
+    gtk_settings = new_gtk_settings;
+    notify (prop_gtk_settings ());
+  }
+
+  peel::Gtk::Settings *
+  get_gtk_settings ()
+  {
+    return gtk_settings;
+  }
+
   PEEL_PROPERTY (bool, busy, "busy");
-  PEEL_PROPERTY (peel::String, downloaded_sha, "downloaded-sha");
   PEEL_PROPERTY (peel::String, message, "message");
+  PEEL_PROPERTY (peel::String, downloaded_sha, "downloaded-sha");
+  PEEL_PROPERTY (peel::Gtk::Settings, gtk_settings, "gtk-settings");
 
   peel::coro::SimpleTask
   pull_repo ();
