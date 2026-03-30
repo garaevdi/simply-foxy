@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<component type="desktop-application">
+  <!--Created with jdAppStreamEdit 9.2-->
+  <id>io.github.garaevdi.simplyfoxy</id>
+  <name>Simply Foxy</name>
+  <summary>Make your fox-based browser simpler</summary>
+  <developer id="garaevdi">
+    <name>Denis Garaev</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <update_contact>garaevdi@yandex.ru</update_contact>
+  <description>
+    <p>A simple utility to install and update elementary OS Firefox Theme* for fox-based browsers. It makes your browser harmonize with elementary OS without the need to open a terminal to apply this simple theme.</p>
+    <p>*The elementary OS Firefox theme is developed and maintained by Zonnev. This application provides a gui to install it.</p>
+    <p>The Firefox browser is not included and must be downloaded separately. This project is not affiliated or endorsed by the Mozilla Foundation and/or elementary inc. Firefox is a trademark of the Mozilla Foundation in the U.S. and other countries. elementary OS is a trademark of the elementary inc. in the U.S. and other countries.</p>
+  </description>
+  <releases>
+    <release version="0.1.0" date="2026-03-30" type="development">
+      <description>
+        <p>First release</p>
+      </description>
+    </release>
+  </releases>
+  <url type="bugtracker">https://github.com/garaevdi/simply-foxy/issues</url>
+  <url type="translate">https://github.com/garaevdi/simply-foxy/tree/main/po</url>
+  <url type="vcs-browser">https://github.com/garaevdi/simply-foxy</url>
+  <categories>
+    <category>Utility</category>
+  </categories>
+  <recommends>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </recommends>
+  <content_rating type="oars-1.1"/>
+  <launchable type="desktop-id">io.github.garaevdi.simplyfoxy.desktop</launchable>
+  <provides>
+    <binary>io.github.garaevdi.simplyfoxy</binary>
+  </provides>
+  <keywords>
+    <keyword>elementary</keyword>
+    <keyword>firefox</keyword>
+    <keyword>theme</keyword>
+    <keyword>granite</keyword>
+  </keywords>
+</component>

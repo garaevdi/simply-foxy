@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Simply Foxy
+Comment=Make your fox-based browser simpler
+Keywords=elementary;firefox;theme;granite
+Exec=@APP_ID@
+Icon=@APP_ID@
+Terminal=false
+Type=Application
+Categories=Utility
+X-GNOME_Gettext-Domain=@GETTEXT@
