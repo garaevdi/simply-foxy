@@ -26,13 +26,13 @@ FirefoxManager::init (Class *)
 
   // clang-format off
   locations = {
-    { GLib::strconcat (home, "/.mozilla/firefox"), "Firefox", false },
-    { GLib::strconcat (home, "/.config/mozilla/firefox"), "Firefox", false },
-    { GLib::strconcat (home, "/.var/app/io.gitlab.librewolf-community/.librewolf"), "Librewolf (flatpak)", true },
-    { GLib::strconcat (home, "/.var/app/org.mozilla.firefox/.mozilla/firefox"), "Firefox (flatpak)", true },
-    { GLib::strconcat (home, "/.var/app/org.mozilla.firefox/config/mozilla/firefox/"), "Firefox (flatpak)", true },
-    { GLib::strconcat (home, "/snap/firefox/common/.mozilla/firefox"), "Firefox (snap)", true },
-    { GLib::strconcat (home, "/.librewolf"), "Librewolf", false },
+    { GLib::build_filename (home, ".mozilla", "firefox"), "Firefox", false },
+    { GLib::build_filename (home, ".config", "mozilla", "firefox"), "Firefox", false },
+    { GLib::build_filename (home, ".var", "app", "io.gitlab.librewolf-community", ".librewolf"), "Librewolf (flatpak)", true },
+    { GLib::build_filename (home, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"), "Firefox (flatpak)", true },
+    { GLib::build_filename (home, ".var", "app", "org.mozilla.firefox", "config", "mozilla", "firefox"), "Firefox (flatpak)", true },
+    { GLib::build_filename (home, "snap", "firefox", "common", ".mozilla", "firefox"), "Firefox (snap)", true },
+    { GLib::build_filename (home, ".librewolf"), "Librewolf", false },
   };
   // clang-format on
 }
