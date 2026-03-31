@@ -3,7 +3,8 @@ project(
   'cpp',
   version: '0.1.0',
   license: 'GPL-3.0-or-later',
-  meson_version: '>=0.59'
+  meson_version: '>=0.59',
+  default_options: ['cpp_std=c++23']
 )
 
 app_id = 'io.github.garaevdi.' + meson.project_name()

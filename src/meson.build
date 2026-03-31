@@ -55,7 +55,7 @@ srcs = [
 executable(
   app_id,
   srcs,
-  cpp_args: ['-fcoroutines', '-fpermissive', '-std=c++20'],
+  cpp_args: ['-fpermissive'],
   dependencies: deps,
   install: true
 )
