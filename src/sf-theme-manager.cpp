@@ -38,6 +38,7 @@ ThemeManager::init (Class *)
     if (err) [[unlikely]]
     {
       critical (_ ("Couldn't create data folder: %s"), err->message);
+      set_broken (true);
       return;
     }
   }
@@ -66,6 +67,7 @@ ThemeManager::get_latest_hash ()
   if (error)
   {
     critical (_ ("Couldn't get commits information: %s"), error->message);
+    set_broken (true);
     co_return;
   }
   if (message->get_status () != Soup::Status::OK)
@@ -73,6 +75,7 @@ ThemeManager::get_latest_hash ()
     critical (
       _ ("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ()
     );
+    set_broken (true);
     co_return;
   }
 
@@ -81,6 +84,7 @@ ThemeManager::get_latest_hash ()
   if (!(pareser->load_from_stream_finish (co_await async_result, &error)))
   {
     critical (_ ("Couldn't parser recieved JSON: %s"), error->message);
+    set_broken (true);
     co_return;
   }
 
@@ -98,9 +102,14 @@ ThemeManager::get_latest_hash ()
     co_await download_archive ();
     set_downloaded_sha (hash);
     if (!(co_await find_theme_dir ()))
+    {
       critical ("%s", _ ("Still couldn't find theme"));
+      set_broken (true);
+      co_return;
+    }
   }
 
+  set_broken (false);
   co_return;
 }
 
@@ -127,6 +136,7 @@ ThemeManager::download_archive ()
   if (error)
   {
     critical (_ ("Couldn't download archive: %s"), error->message);
+    set_broken (true);
     co_return;
   }
   if (message->get_status () != Soup::Status::OK)
@@ -134,6 +144,7 @@ ThemeManager::download_archive ()
     critical (
       _ ("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ()
     );
+    set_broken (true);
     co_return;
   }
 
@@ -150,6 +161,7 @@ ThemeManager::download_archive ()
     if (error)
     {
       critical (_ ("Couldn't replace old archive: %s"), error->message);
+      set_broken (true);
       co_return;
     }
     debug ("%s", _ ("Archive overwritten"));
@@ -164,6 +176,7 @@ ThemeManager::download_archive ()
     if (error)
     {
       critical (_ ("Couldn't create archive file: %s"), error->message);
+      set_broken (true);
       co_return;
     }
 
@@ -174,6 +187,7 @@ ThemeManager::download_archive ()
     if (error)
     {
       critical (_ ("Couldn't write archive file: %s"), error->message);
+      set_broken (true);
       co_return;
     }
     debug ("%s", _ ("Data written, archive ready!"));
@@ -193,10 +207,13 @@ ThemeManager::extract_archive (RefPtr<Gio::File> archive)
   UniquePtr<GLib::Error> error;
   String cmd
     = GLib::strconcat ("unzip -d ", extract_dir->get_path (), " -o ", archive->get_path ());
-  debug (_("Unzippign archive with the following cmd: %s"), cmd.c_str ());
+  debug (_ ("Unzippign archive with the following cmd: %s"), cmd.c_str ());
   GLib::spawn_command_line_sync (cmd, nullptr, nullptr, nullptr, &error);
   if (error)
+  {
     critical (_ ("Couldn't unzip archive: %s"), error->message);
+    set_broken (true);
+  }
   else
     debug ("%s", _ ("Unzipped archive"));
 }
@@ -226,7 +243,7 @@ ThemeManager::find_theme_dir ()
 
   if (!(extract_dir->query_exists (nullptr)))
   {
-    critical ("%s", _ ("No extract directory, aborting"));
+    warning ("%s", _ ("No extract directory, aborting"));
     co_return false;
   }
   extract_dir->enumerate_children_async (
@@ -237,14 +254,14 @@ ThemeManager::find_theme_dir ()
     = extract_dir->enumerate_children_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_ ("Coulnd't get data directory childern: %s"), error->message);
+    warning (_ ("Coulnd't get data directory childern: %s"), error->message);
     co_return false;
   }
   enumerator->next_files_async (10, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
   UniquePtr<GLib::List> files = enumerator->next_files_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_ ("Couldn't get list of files to find theme folder: %s"), error->message);
+    warning (_ ("Couldn't get list of files to find theme folder: %s"), error->message);
     co_return false;
   }
   if (files)

@@ -47,6 +47,16 @@ ApplicationWindow::init (Class *)
     peel::GObject::BindingFlags::INVERT_BOOLEAN
   );
   peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_broken (),
+    install_btn, Gtk::Widget::prop_sensitive (),
+    peel::GObject::BindingFlags::INVERT_BOOLEAN
+  );
+  peel::GObject::Object::bind_property (
+    theme_manager, ThemeManager::prop_broken (),
+    uninstall_btn, Gtk::Widget::prop_sensitive (),
+    peel::GObject::BindingFlags::INVERT_BOOLEAN
+  );
+  peel::GObject::Object::bind_property (
     theme_manager, ThemeManager::prop_busy (),
     overlaybar, Granite::OverlayBar::prop_active ()
   );

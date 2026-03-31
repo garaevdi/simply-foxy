@@ -30,6 +30,7 @@ class ThemeManager final : public peel::GObject::Object
   static peel::Signal<ThemeManager, void ()> update_available_sig;
 
   bool busy;
+  bool broken;
   peel::String message;
   peel::String downloaded_sha;
   peel::RefPtr<peel::Gtk::Settings> gtk_settings;
@@ -42,6 +43,9 @@ class ThemeManager final : public peel::GObject::Object
     f.prop (prop_busy (), false)
       .get (&ThemeManager::get_busy)
       .set (&ThemeManager::set_busy);
+    f.prop (prop_broken (), false)
+      .get (&ThemeManager::get_broken)
+      .set (&ThemeManager::set_broken);
     f.prop (prop_message (), nullptr)
       .get (&ThemeManager::get_message)
       .set (&ThemeManager::set_message);
@@ -89,6 +93,16 @@ class ThemeManager final : public peel::GObject::Object
   }
 
   void
+  set_broken (bool new_value)
+  {
+    if (broken == new_value)
+      return;
+
+    broken = new_value;
+    notify (prop_broken ());
+  }
+
+  void
   set_downloaded_sha (const char *new_sha)
   {
     if (downloaded_sha)
@@ -120,6 +134,12 @@ public:
     return busy;
   }
 
+  bool
+  get_broken ()
+  {
+    return broken;
+  }
+
   const char *
   get_message ()
   {
@@ -146,6 +166,7 @@ public:
   }
 
   PEEL_PROPERTY (bool, busy, "busy");
+  PEEL_PROPERTY (bool, broken, "broken");
   PEEL_PROPERTY (peel::String, message, "message");
   PEEL_PROPERTY (peel::String, downloaded_sha, "downloaded-sha");
   PEEL_PROPERTY (peel::Gtk::Settings, gtk_settings, "gtk-settings");
