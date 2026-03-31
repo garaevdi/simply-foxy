@@ -37,7 +37,7 @@ ThemeManager::init (Class *)
     data_dir->make_directory (nullptr, &err);
     if (err) [[unlikely]]
     {
-      critical (_("Couldn't create data folder: %s"), err->message);
+      critical (_ ("Couldn't create data folder: %s"), err->message);
       return;
     }
   }
@@ -65,12 +65,14 @@ ThemeManager::get_latest_hash ()
   RefPtr<Gio::InputStream> stream = session->send_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't get commits information: %s"), error->message);
+    critical (_ ("Couldn't get commits information: %s"), error->message);
     co_return;
   }
   if (message->get_status () != Soup::Status::OK)
   {
-    critical (_("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ());
+    critical (
+      _ ("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ()
+    );
     co_return;
   }
 
@@ -78,7 +80,7 @@ ThemeManager::get_latest_hash ()
   pareser->load_from_stream_async (stream, nullptr, async_result.callback ());
   if (!(pareser->load_from_stream_finish (co_await async_result, &error)))
   {
-    critical (_("Couldn't parser recieved JSON: %s"), error->message);
+    critical (_ ("Couldn't parser recieved JSON: %s"), error->message);
     co_return;
   }
 
@@ -86,17 +88,17 @@ ThemeManager::get_latest_hash ()
   RefPtr<Json::Node> commit = root->get_array ()->get_element (0);
   String hash = commit->get_object ()->get_string_member ("sha");
 
-  debug (_("Got latest commit hash: %s"), hash.c_str ());
+  debug (_ ("Got latest commit hash: %s"), hash.c_str ());
 
   if (downloaded_sha != hash || !(co_await find_theme_dir ()))
   {
     if (downloaded_sha != hash || downloaded_sha == "")
       update_available_sig.emit (this);
-    debug (_("Downloading theme at %s"), hash.c_str ());
+    debug (_ ("Downloading theme at %s"), hash.c_str ());
     co_await download_archive ();
     set_downloaded_sha (hash);
     if (!(co_await find_theme_dir ()))
-      critical ("%s", _("Still couldn't find theme"));
+      critical ("%s", _ ("Still couldn't find theme"));
   }
 
   co_return;
@@ -119,60 +121,62 @@ ThemeManager::download_archive ()
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> error;
 
-  debug ("%s", _("Sending GET request to github..."));
+  debug ("%s", _ ("Sending GET request to github..."));
   session->send_and_read_async (message, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
   RefPtr<GLib::Bytes> bytes = session->send_and_read_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't download archive: %s"), error->message);
+    critical (_ ("Couldn't download archive: %s"), error->message);
     co_return;
   }
   if (message->get_status () != Soup::Status::OK)
   {
-    critical (_("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ());
+    critical (
+      _ ("Wrong status code: %d %s"), message->get_status (), message->get_reason_phrase ()
+    );
     co_return;
   }
 
-  debug (_("Read %zu bytes"), bytes->get_size ());
+  debug (_ ("Read %zu bytes"), bytes->get_size ());
 
   RefPtr<Gio::File> archive = data_dir->get_child ("elementary-firefox-theme.zip");
   if (archive->query_exists (nullptr))
   {
-    debug ("%s", _("Old archive already exists, trying to overwrite it..."));
+    debug ("%s", _ ("Old archive already exists, trying to overwrite it..."));
     archive->replace_contents_bytes_async (
       bytes, nullptr, false, Gio::File::CreateFlags::NONE, nullptr, async_result.callback ()
     );
     archive->replace_contents_finish (co_await async_result, nullptr, &error);
     if (error)
     {
-      critical (_("Couldn't replace old archive: %s"), error->message);
+      critical (_ ("Couldn't replace old archive: %s"), error->message);
       co_return;
     }
-    debug ("%s", _("Archive overwritten"));
+    debug ("%s", _ ("Archive overwritten"));
   }
   else
   {
-    debug ("%s", _("Creating new file for archive..."));
+    debug ("%s", _ ("Creating new file for archive..."));
     archive->create_async (
       Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, nullptr, async_result.callback ()
     );
     RefPtr<Gio::FileOutputStream> stream = archive->create_finish (co_await async_result, &error);
     if (error)
     {
-      critical (_("Couldn't create archive file: %s"), error->message);
+      critical (_ ("Couldn't create archive file: %s"), error->message);
       co_return;
     }
 
-    debug ("%s", _("File created, trying to write data into it..."));
+    debug ("%s", _ ("File created, trying to write data into it..."));
 
     stream->write_bytes_async (bytes, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
     stream->write_bytes_finish (co_await async_result, &error);
     if (error)
     {
-      critical (_("Couldn't write archive file: %s"), error->message);
+      critical (_ ("Couldn't write archive file: %s"), error->message);
       co_return;
     }
-    debug ("%s", _("Data written, archive ready!"));
+    debug ("%s", _ ("Data written, archive ready!"));
   }
 
   extract_archive (archive);
@@ -192,9 +196,9 @@ ThemeManager::extract_archive (RefPtr<Gio::File> archive)
   debug (_("Unzippign archive with the following cmd: %s"), cmd.c_str ());
   GLib::spawn_command_line_sync (cmd, nullptr, nullptr, nullptr, &error);
   if (error)
-    critical (_("Couldn't unzip archive: %s"), error->message);
+    critical (_ ("Couldn't unzip archive: %s"), error->message);
   else
-    debug ("%s", _("Unzipped archive"));
+    debug ("%s", _ ("Unzipped archive"));
 }
 
 coro::Future<void>
@@ -204,13 +208,13 @@ ThemeManager::cleanup_data_dir ()
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> error;
 
-  debug ("%s", _("Starting data directory cleanup..."));
+  debug ("%s", _ ("Starting data directory cleanup..."));
   if (extract_dir->query_exists (nullptr))
   {
     extract_dir->trash_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
     extract_dir->trash_finish (co_await async_result, &error);
   }
-  debug ("%s", _("Cleanup finished"));
+  debug ("%s", _ ("Cleanup finished"));
   co_return;
 }
 
@@ -222,7 +226,7 @@ ThemeManager::find_theme_dir ()
 
   if (!(extract_dir->query_exists (nullptr)))
   {
-    critical ("%s", _("No extract directory, aborting"));
+    critical ("%s", _ ("No extract directory, aborting"));
     co_return false;
   }
   extract_dir->enumerate_children_async (
@@ -233,14 +237,14 @@ ThemeManager::find_theme_dir ()
     = extract_dir->enumerate_children_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Coulnd't get data directory childern: %s"), error->message);
+    critical (_ ("Coulnd't get data directory childern: %s"), error->message);
     co_return false;
   }
   enumerator->next_files_async (10, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
   UniquePtr<GLib::List> files = enumerator->next_files_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't get list of files to find theme folder: %s"), error->message);
+    critical (_ ("Couldn't get list of files to find theme folder: %s"), error->message);
     co_return false;
   }
   if (files)
@@ -263,7 +267,7 @@ ThemeManager::find_theme_dir ()
   if (!theme_dir)
     co_return false;
 
-  debug ("%s", _("Found theme directory"));
+  debug ("%s", _ ("Found theme directory"));
   co_return true;
 }
 
@@ -314,8 +318,8 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
   if (!(usercontent->query_exists (nullptr) && base->query_exists (nullptr)
         && flatpak->query_exists (nullptr) && userchrome->query_exists (nullptr)))
   {
-    critical ("%s", _("Couldn't find theme files, try to redownload the theme"));
-    debug (_("Theme dir is: %s"), theme_dir->get_path ().c_str ());
+    critical ("%s", _ ("Couldn't find theme files, try to redownload the theme"));
+    debug (_ ("Theme dir is: %s"), theme_dir->get_path ().c_str ());
     co_return;
   }
 
@@ -326,7 +330,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
     chrome->make_directory_finish (co_await async_result, &error);
     if (error)
     {
-      critical (_("Couldn't create \"chrome\" directory: %s"), error->message);
+      critical (_ ("Couldn't create \"chrome\" directory: %s"), error->message);
       co_return;
     }
   }
@@ -359,7 +363,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
   }
   if (error) [[unlikely]]
   {
-    critical (_("Couldn't create \"user.js\" file: %s"), error->message);
+    critical (_ ("Couldn't create \"user.js\" file: %s"), error->message);
     co_return;
   }
 
@@ -380,7 +384,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile)
   user_js->replace_contents_finish (co_await async_result, nullptr, &error);
   if (error) [[unlikely]]
   {
-    critical (_("Couldn't write to \"user.js\" file: %s"), error->message);
+    critical (_ ("Couldn't write to \"user.js\" file: %s"), error->message);
   }
 
   profile->set_theme_sha (downloaded_sha);
@@ -403,7 +407,7 @@ ThemeManager::actually_uninstall_theme (RefPtr<FirefoxProfile> profile)
   chrome->trash_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't delete chrome folder: %s"), error->message);
+    critical (_ ("Couldn't delete chrome folder: %s"), error->message);
     co_return;
   }
 
@@ -413,7 +417,7 @@ ThemeManager::actually_uninstall_theme (RefPtr<FirefoxProfile> profile)
     user_js->delete_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
     user_js->delete_finish (co_await async_result, &error);
     if (error)
-      critical (_("Couldn't delete user.js file: %s"), error->message);
+      critical (_ ("Couldn't delete user.js file: %s"), error->message);
   }
 
   profile->set_theme_sha ("");
