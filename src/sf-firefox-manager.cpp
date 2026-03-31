@@ -120,8 +120,14 @@ FirefoxManager::update_profiles ()
 {
   profiles->remove_all ();
 
+  std::vector<coro::Future<void>> futures;
+  futures.reserve(locations.size());
+
   for (Firefox fox : locations)
-    find_profiles (fox);
+    futures.push_back(find_profiles(fox));
+
+  for (auto &future : futures)
+    co_await future;
 
   co_return;
 }
