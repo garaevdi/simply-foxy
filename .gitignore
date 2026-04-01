@@ -2,4 +2,5 @@ _build
 .flatpak
 .flatpak-builder
 .clangd
-./subprojects/peel
+subprojects/peel
+subprojects/blueprint-compiler
