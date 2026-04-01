@@ -48,7 +48,7 @@ FirefoxManager::find_profiles (Firefox fox)
   RefPtr<Gio::File> file = Gio::File::create_for_path (path);
   if (!file->query_exists (nullptr))
   {
-    debug (_("No profile found at %s, skipping it"), path.c_str ());
+    debug (_ ("No profile found at %s, skipping it"), path.c_str ());
     co_return;
   }
 
@@ -63,7 +63,7 @@ FirefoxManager::find_profiles (Firefox fox)
     = file->enumerate_children_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't enumerate files in profile directory: %s"), error->message);
+    critical (_ ("Couldn't enumerate files in profile directory: %s"), error->message);
     co_return;
   }
 
@@ -74,7 +74,7 @@ FirefoxManager::find_profiles (Firefox fox)
     files = enumerator->next_files_finish (co_await async_result, &error);
     if (error)
     {
-      warning (_("Couldn't get files out of enumerator: %s"), error->message);
+      warning (_ ("Couldn't get files out of enumerator: %s"), error->message);
       continue;
     }
     GLib::List::foreach (
@@ -88,19 +88,25 @@ FirefoxManager::find_profiles (Firefox fox)
         RefPtr<Gio::File> file = enumerator->get_child (info);
         std::string name = info->get_name ();
 
-        if (name.find ("default-") != std::string::npos)
+        if (name.find ("default") != std::string::npos)
         {
-          if (name.find ("esr") != std::string::npos)
+          // Snap firefox stores user settings in a xxxxx.default folder, while other foxes store
+          // user settings in a xxxxx.default-xxxxx folder
+          RefPtr<Gio::File> prefsjs = file->get_child ("prefs.js");
+          if (prefsjs->query_exists (nullptr))
           {
-            profile_name = GLib::strconcat (profile_name, " ESR");
+            if (name.find ("esr") != std::string::npos)
+            {
+              profile_name = GLib::strconcat (profile_name, " ESR");
+            }
+            else if (name.find ("nightly") != std::string::npos)
+            {
+              profile_name = GLib::strconcat (profile_name, " Nightly");
+            }
+            debug (_ ("Found profile %s at %s"), profile_name.c_str (), path.c_str ());
+            RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
+            profiles->append (profile);
           }
-          else if (name.find ("nightly") != std::string::npos)
-          {
-            profile_name = GLib::strconcat (profile_name, " Nightly");
-          }
-          debug (_("Found profile %s at %s"), profile_name.c_str (), path.c_str ());
-          RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
-          profiles->append (profile);
         }
       }
     );
@@ -110,7 +116,7 @@ FirefoxManager::find_profiles (Firefox fox)
   enumerator->close_finish (co_await async_result, &error);
   if (error)
   {
-    critical (_("Couldn't close enumerator: %s"), error->message);
+    critical (_ ("Couldn't close enumerator: %s"), error->message);
     co_return;
   }
 }
@@ -121,10 +127,10 @@ FirefoxManager::update_profiles ()
   profiles->remove_all ();
 
   std::vector<coro::Future<void>> futures;
-  futures.reserve(locations.size());
+  futures.reserve (locations.size ());
 
   for (Firefox fox : locations)
-    futures.push_back(find_profiles(fox));
+    futures.push_back (find_profiles (fox));
 
   for (auto &future : futures)
     co_await future;
