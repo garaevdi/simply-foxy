@@ -59,7 +59,7 @@ if glib_compile_schemas.found()
   )
 endif
 
-blueprint_compiler = find_program('blueprint-compiler', required: true)
+blueprint_compiler = find_program('blueprint-compiler', required: true, version: '>=0.14')
 blueprints = custom_target(
   'blueprints',
   input: files(
