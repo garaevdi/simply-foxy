@@ -6,30 +6,9 @@ Simple gui installer for [elementary OS Firefox Theme](https://github.com/Zonnev
 
 # Building from source
 
-Build dependecies:
+## Flatpak
 
+The only way to build this on elementary OS is to use `flatpak-builder`. Also you would need to install daily versions of `io.elementary.Platform` and `io.elementary.Sdk`. Then simply run the following command in the repository directory
 ```
-gtk4
-libadwaita-1
-libgranite-7
-blueprint-compiler
-libsoup-3.0
-json-glib-1.0
-gettext
-```
-
-Also note that it requires unzip as a runtime dependency.
-
-Build:
-
-```
-git clone https://github.com/garaevdi/simply-foxy.git
-cd simply-foxy
-meson setup _build
-```
-
-Install
-
-```
-ninja -C _build install
+flatpak-builder --force-clean --install --user .flatpak io.github.garaevdi.simplyfoxy.yml
 ```
