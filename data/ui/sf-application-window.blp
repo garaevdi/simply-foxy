@@ -20,120 +20,122 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
 
   title: "Simply Foxy";
 
-  child: Gtk.Overlay {
-    [overlay]
-    Granite.Toast update_toast {
-      title: _("Update available");
-    }
-
-    [overlay]
-    Granite.OverlayBar overlaybar {}
-
-    child: Granite.Box {
-      orientation: vertical;
-
-      Granite.Box content_box {
-        orientation: vertical;
-        hexpand: true;
-        vexpand: true;
-        halign: center;
-        valign: center;
-        width-request: 400;
-        child-spacing: single;
-
-        Gtk.ListBox {
-          activate-on-single-click: false;
-          show-separators: true;
-          selection-mode: none;
-
-          css-classes: [
-            "card",
-            "separators",
-            "rich-list",
-          ];
-
-          Granite.ListItem {
-            child: Granite.Box {
-              orientation: horizontal;
-              hexpand: true;
-              focusable: false;
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: start;
-                hexpand: true;
-
-                Gtk.Label {
-                  label: _("Profile");
-                }
-              }
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: end;
-
-                Gtk.DropDown profile_dd {}
-              }
-            };
-          }
-
-          Granite.ListItem {
-            child: Granite.Box {
-              focusable: false;
-              orientation: horizontal;
-              hexpand: true;
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: start;
-                hexpand: true;
-
-                Gtk.Label {
-                  label: _("Rounded corners");
-                }
-              }
-
-              Granite.Box {
-                orientation: vertical;
-                valign: center;
-                halign: end;
-
-                Gtk.Switch corners_sw {}
-              }
-            };
-          }
-        }
-
-        Granite.Box {
-          orientation: horizontal;
-
-          Gtk.Button uninstall_btn {
-            css-classes: [
-              "destructive",
-            ];
-
-            sensitive: false;
-            hexpand: true;
-            halign: start;
-            label: _("Uninstall");
-            clicked => $uninstall_btn_clicked_cb();
-          }
-
-          Gtk.Button install_btn {
-            css-classes: [
-              "suggested",
-            ];
-
-            hexpand: true;
-            halign: end;
-            label: _("Install");
-            clicked => $install_btn_clicked_cb();
-          }
-        }
+  child: Gtk.WindowHandle {
+    child: Gtk.Overlay {
+      [overlay]
+      Granite.Toast update_toast {
+        title: _("Update available");
       }
+
+      [overlay]
+      Granite.OverlayBar overlaybar {}
+
+      child: Granite.Box {
+        orientation: vertical;
+
+        Granite.Box content_box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+          halign: center;
+          valign: center;
+          width-request: 400;
+          child-spacing: single;
+
+          Gtk.ListBox {
+            activate-on-single-click: false;
+            show-separators: true;
+            selection-mode: none;
+
+            css-classes: [
+              "card",
+              "separators",
+              "rich-list",
+            ];
+
+            Granite.ListItem {
+              child: Granite.Box {
+                orientation: horizontal;
+                hexpand: true;
+                focusable: false;
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: start;
+                  hexpand: true;
+
+                  Gtk.Label {
+                    label: _("Profile");
+                  }
+                }
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: end;
+
+                  Gtk.DropDown profile_dd {}
+                }
+              };
+            }
+
+            Granite.ListItem {
+              child: Granite.Box {
+                focusable: false;
+                orientation: horizontal;
+                hexpand: true;
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: start;
+                  hexpand: true;
+
+                  Gtk.Label {
+                    label: _("Rounded corners");
+                  }
+                }
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: end;
+
+                  Gtk.Switch corners_sw {}
+                }
+              };
+            }
+          }
+
+          Granite.Box {
+            orientation: horizontal;
+
+            Gtk.Button uninstall_btn {
+              css-classes: [
+                "destructive",
+              ];
+
+              sensitive: false;
+              hexpand: true;
+              halign: start;
+              label: _("Uninstall");
+              clicked => $uninstall_btn_clicked_cb();
+            }
+
+            Gtk.Button install_btn {
+              css-classes: [
+                "suggested",
+              ];
+
+              hexpand: true;
+              halign: end;
+              label: _("Install");
+              clicked => $install_btn_clicked_cb();
+            }
+          }
+        }
+      };
     };
   };
 }
