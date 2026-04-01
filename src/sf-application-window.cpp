@@ -133,13 +133,15 @@ void
 ApplicationWindow::install_btn_clicked_cb (Gtk::Button *btn)
 {
   RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
-  theme_manager->install_theme (profile);
+  if (profile)
+    theme_manager->install_theme (profile);
 }
 
 void
 ApplicationWindow::uninstall_btn_clicked_cb (Gtk::Button *btn)
 {
   RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
-  theme_manager->uninstall_theme (profile);
+  if (profile)
+    theme_manager->uninstall_theme (profile);
 }
 } // namespace Sf
