@@ -4,3 +4,4 @@ _build
 .clangd
 subprojects/peel
 subprojects/blueprint-compiler
+subprojects/*
