@@ -61,26 +61,30 @@ class ThemeManager final : public peel::GObject::Object
   inline void
   init (Class *);
 
-  peel::coro::Future<void>
-  get_latest_hash ();
+  peel::coro::Future<peel::String>
+  get_latest_hash (peel::UniquePtr<peel::GLib::Error> *error);
 
-  peel::coro::Future<void>
-  download_archive ();
-
-  peel::coro::Future<void>
-  extract_archive (peel::RefPtr<peel::Gio::File> file);
-
-  peel::coro::Future<void>
-  cleanup_data_dir ();
+  peel::coro::Future<peel::RefPtr<peel::Gio::File>>
+  download_archive (peel::UniquePtr<peel::GLib::Error> *error);
 
   peel::coro::Future<bool>
-  find_theme_dir ();
+  extract_archive (peel::RefPtr<peel::Gio::File> file, peel::UniquePtr<peel::GLib::Error> *error);
 
   peel::coro::Future<void>
-  actually_install_theme (peel::RefPtr<FirefoxProfile> profile);
+  cleanup_data_dir (peel::UniquePtr<peel::GLib::Error> *error);
+
+  peel::coro::Future<peel::RefPtr<peel::Gio::File>>
+  find_theme_dir (peel::UniquePtr<peel::GLib::Error> *error);
 
   peel::coro::Future<void>
-  actually_uninstall_theme (peel::RefPtr<FirefoxProfile> profile);
+  actually_install_theme (
+    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error
+  );
+
+  peel::coro::Future<void>
+  actually_uninstall_theme (
+    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error
+  );
 
   void
   set_busy (bool state)
