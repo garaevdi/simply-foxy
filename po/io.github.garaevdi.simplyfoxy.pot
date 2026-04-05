@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.github.garaevdi.simplyfoxy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-30 12:54+0300\n"
+"POT-Creation-Date: 2026-04-06 01:20+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,35 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/ui/sf-application-window.blp:26
+#: data/ui/sf-application-window.blp:27
 msgid "Update available"
 msgstr ""
 
-#: data/ui/sf-application-window.blp:68
+#: data/ui/sf-application-window.blp:32
+msgid "Theme installed, don't forget to restart the browser"
+msgstr ""
+
+#: data/ui/sf-application-window.blp:37
+msgid "Theme uninstalled, don't forget to restart the browser"
+msgstr ""
+
+#: data/ui/sf-application-window.blp:79
 msgid "Profile"
 msgstr ""
 
-#: data/ui/sf-application-window.blp:95
+#: data/ui/sf-application-window.blp:106
+msgid "Use native titlebar"
+msgstr ""
+
+#: data/ui/sf-application-window.blp:133
 msgid "Rounded corners"
 msgstr ""
 
-#: data/ui/sf-application-window.blp:121
+#: data/ui/sf-application-window.blp:159
 msgid "Uninstall"
 msgstr ""
 
-#: data/ui/sf-application-window.blp:132
+#: data/ui/sf-application-window.blp:170
 msgid "Install"
 msgstr ""
 
@@ -52,12 +64,12 @@ msgstr ""
 msgid "Couldn't get files out of enumerator: %s"
 msgstr ""
 
-#: src/sf-firefox-manager.cpp:101
+#: src/sf-firefox-manager.cpp:106
 #, c-format
 msgid "Found profile %s at %s"
 msgstr ""
 
-#: src/sf-firefox-manager.cpp:113
+#: src/sf-firefox-manager.cpp:119
 #, c-format
 msgid "Couldn't close enumerator: %s"
 msgstr ""
@@ -67,183 +79,130 @@ msgstr ""
 msgid "Creating relocatable schema with path: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:40
+#: src/sf-theme-manager.cpp:55
 #, c-format
 msgid "Couldn't create data folder: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:52
+#: src/sf-theme-manager.cpp:68
+msgid "Trying to get latest commit hash"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:69
 msgid "Checking for updates..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:68
+#: src/sf-theme-manager.cpp:93 src/sf-theme-manager.cpp:144
 #, c-format
-msgid "Couldn't get commits information: %s"
+msgid "Wrong status code : %d %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:73 src/sf-theme-manager.cpp:132
-#, c-format
-msgid "Wrong status code: %d %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:81
-#, c-format
-msgid "Couldn't parser recieved JSON: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:89
+#: src/sf-theme-manager.cpp:109
 #, c-format
 msgid "Got latest commit hash: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:95
-#, c-format
-msgid "Downloading theme at %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:99
-msgid "Still couldn't find theme"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:108
+#: src/sf-theme-manager.cpp:116
 msgid "Downloading theme..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:122
+#: src/sf-theme-manager.cpp:130
 msgid "Sending GET request to github..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:127
-#, c-format
-msgid "Couldn't download archive: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:136
+#: src/sf-theme-manager.cpp:151
 #, c-format
 msgid "Read %zu bytes"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:141
+#: src/sf-theme-manager.cpp:156
 msgid "Old archive already exists, trying to overwrite it..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:148
-#, c-format
-msgid "Couldn't replace old archive: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:151
+#: src/sf-theme-manager.cpp:167
 msgid "Archive overwritten"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:155
+#: src/sf-theme-manager.cpp:171
 msgid "Creating new file for archive..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:162
-#, c-format
-msgid "Couldn't create archive file: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:166
+#: src/sf-theme-manager.cpp:183
 msgid "File created, trying to write data into it..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:172
-#, c-format
-msgid "Couldn't write archive file: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:175
+#: src/sf-theme-manager.cpp:193
 msgid "Data written, archive ready!"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:186
+#: src/sf-theme-manager.cpp:201
 msgid "Unpacking theme..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:192
+#: src/sf-theme-manager.cpp:205
 #, c-format
 msgid "Unzippign archive with the following cmd: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:195
-#, c-format
-msgid "Couldn't unzip archive: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:197
-msgid "Unzipped archive"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:203
+#: src/sf-theme-manager.cpp:219
 msgid "Cleaning old files..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:207
+#: src/sf-theme-manager.cpp:223
 msgid "Starting data directory cleanup..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:213
+#: src/sf-theme-manager.cpp:232
 msgid "Cleanup finished"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:225
-msgid "No extract directory, aborting"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:236
+#: src/sf-theme-manager.cpp:246 src/sf-theme-manager.cpp:295
 #, c-format
-msgid "Coulnd't get data directory childern: %s"
+msgid "%s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:243
-#, c-format
-msgid "Couldn't get list of files to find theme folder: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:266
-msgid "Found theme directory"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:273
+#: src/sf-theme-manager.cpp:306
 msgid "Installing theme..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:317
+#: src/sf-theme-manager.cpp:350
 msgid "Couldn't find theme files, try to redownload the theme"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:318
+#: src/sf-theme-manager.cpp:351
 #, c-format
 msgid "Theme dir is: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:329
-#, c-format
-msgid "Couldn't create \"chrome\" directory: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:362
-#, c-format
-msgid "Couldn't create \"user.js\" file: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:383
-#, c-format
-msgid "Couldn't write to \"user.js\" file: %s"
-msgstr ""
-
-#: src/sf-theme-manager.cpp:395
+#: src/sf-theme-manager.cpp:428
 msgid "Uninstalling theme..."
 msgstr ""
 
-#: src/sf-theme-manager.cpp:406
+#: src/sf-theme-manager.cpp:468
 #, c-format
-msgid "Couldn't delete chrome folder: %s"
+msgid "Couldn't get theme's latest commit hash: %s"
 msgstr ""
 
-#: src/sf-theme-manager.cpp:416
-#, c-format
-msgid "Couldn't delete user.js file: %s"
+#: src/sf-theme-manager.cpp:509
+msgid "Couldn't download theme"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:510
+msgid "Check your internet connection and permissions of your file system"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:532
+msgid "Couldn't install theme"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:533
+msgid "Check permissions of your file system and try to redownload the theme"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:555
+msgid "Couldn't uninstall theme"
+msgstr ""
+
+#: src/sf-theme-manager.cpp:555
+msgid "Check permissions of your file system"
 msgstr ""
