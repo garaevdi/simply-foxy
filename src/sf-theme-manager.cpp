@@ -10,9 +10,12 @@ using namespace peel;
 namespace Sf
 {
 
+// clang-format off
 Signal<ThemeManager, void ()> ThemeManager::theme_installed_sig;
 Signal<ThemeManager, void ()> ThemeManager::theme_uninstalled_sig;
 Signal<ThemeManager, void ()> ThemeManager::update_available_sig;
+Signal<ThemeManager, void (const char *, const char *, const char *)> ThemeManager::show_warning_sig;
+// clang-format on
 
 PEEL_CLASS_IMPL (ThemeManager, "SfThemeManager", peel::GObject::Object);
 
@@ -24,9 +27,12 @@ ThemeManager::Class::init ()
 inline void
 ThemeManager::init (Class *)
 {
+  // clang-format off
   theme_installed_sig = Signal<ThemeManager, void ()>::create ("theme-installed");
   theme_uninstalled_sig = Signal<ThemeManager, void ()>::create ("theme-uninstalled");
   update_available_sig = Signal<ThemeManager, void ()>::create ("update-available");
+  show_warning_sig = Signal<ThemeManager, void (const char *, const char *, const char *)>::create ("show-warning");
+  // clang-format on
 
   session = Soup::Session::create ();
   session->set_timeout (10);
@@ -482,7 +488,13 @@ ThemeManager::pull_repo ()
     critical ("%s", error->message);
 
   if (!theme_dir)
+  {
     set_broken (true);
+    show_warning_sig.emit (
+      this, _ ("Couldn't download theme"),
+      _ ("Check your internet connection and permissions of your file system"), "dialog-error"
+    );
+  }
   else
     set_broken (false);
 
@@ -499,7 +511,13 @@ ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
   UniquePtr<GLib::Error> error;
   co_await actually_install_theme (profile, &error);
   if (error)
+  {
     warning ("%s", error->message);
+    show_warning_sig.emit (
+      this, _ ("Couldn't install theme"),
+      _ ("Check permissions of your file system and try to redownload the theme"), "dialog-error"
+    );
+  }
   else
     theme_installed_sig.emit (this);
 
@@ -516,7 +534,13 @@ ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
   UniquePtr<GLib::Error> error;
   co_await actually_uninstall_theme (profile, &error);
   if (error)
+  {
     warning ("%s", error->message);
+    show_warning_sig.emit (
+      this, _ ("Couldn't uninstall theme"), _ ("Check permissions of your file system"),
+      "dialog-error"
+    );
+  }
   else
     theme_uninstalled_sig.emit (this);
 

@@ -88,7 +88,22 @@ ApplicationWindow::init (Class *)
                                           { this->install_toast->send_notification (); });
 
   theme_manager->connect_theme_uninstalled ([this] (peel::GObject::Object *source)
-                                          { this->uninstall_toast->send_notification (); });
+                                            { this->uninstall_toast->send_notification (); });
+
+  theme_manager->connect_show_warning (
+    [this] (peel::GObject::Object *source, String title, String description, String icon_name)
+    {
+      RefPtr<Granite::MessageDialog> dialog
+        = Granite::MessageDialog::create_with_image_from_icon_name (
+          title, description, icon_name, Gtk::ButtonsType::CLOSE
+        );
+      dialog->set_modal (true);
+      dialog->set_transient_for (this);
+      dialog->connect_response ([] (Gtk::Dialog *dialog, int resp_id)
+                                { dialog->destroy (); });
+      dialog->show ();
+    }
+  );
 
   refresh_btn->connect_clicked (
     [this] (Gtk::Button *)

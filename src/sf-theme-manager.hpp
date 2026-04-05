@@ -29,6 +29,7 @@ class ThemeManager final : public peel::GObject::Object
   static peel::Signal<ThemeManager, void ()> theme_installed_sig;
   static peel::Signal<ThemeManager, void ()> theme_uninstalled_sig;
   static peel::Signal<ThemeManager, void ()> update_available_sig;
+  static peel::Signal<ThemeManager, void (const char *, const char *, const char *)> show_warning_sig;
 
   bool busy;
   bool broken;
@@ -125,6 +126,7 @@ public:
   PEEL_SIGNAL_CONNECT_METHOD (theme_installed, theme_installed_sig);
   PEEL_SIGNAL_CONNECT_METHOD (theme_uninstalled, theme_uninstalled_sig);
   PEEL_SIGNAL_CONNECT_METHOD (update_available, update_available_sig);
+  PEEL_SIGNAL_CONNECT_METHOD (show_warning, show_warning_sig);
 
   bool
   get_busy ()
