@@ -376,7 +376,9 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
   // clang-format off
   String conf = GLib::strconcat(
     "user_pref(\"toolkit.legacyUserProfileCustomizations.stylesheets\", true);\n",
-    GLib::strconcat ("user_pref(\"widget.gtk.rounded-bottom-corners.enabled\", ",profile->get_rounded_corners () ? "true" : "false", ");\n")
+    GLib::strconcat ("user_pref(\"widget.gtk.rounded-bottom-corners.enabled\", ",profile->get_rounded_corners () ? "true" : "false", ");\n"),
+    GLib::strconcat ("user_pref(\"browser.tabs.drawInTitlebar\", ", profile->get_native_titlebar () || profile->get_layout () == ButtonLayout::UNKNOWN ? "false" : "true", ");\n"),
+    GLib::strconcat ("user_pref(\"browser.tabs.inTitlebar\", ", profile->get_native_titlebar () || profile->get_layout () == ButtonLayout::UNKNOWN ? "0" : "1", ");\n")
   );
   // clang-format on
 

@@ -40,6 +40,7 @@ class FirefoxProfile final : public peel::GObject::Object
   peel::RefPtr<peel::Gio::File> file;
   peel::String theme_sha;
   ButtonLayout layout;
+  bool native_titlebar;
   bool rounded_corners;
 
   template <typename F>
@@ -70,6 +71,9 @@ class FirefoxProfile final : public peel::GObject::Object
     f.prop (prop_layout (), ButtonLayout::ELEMENTARY)
       .get (&FirefoxProfile::get_layout)
       .set (&FirefoxProfile::set_layout);
+    f.prop (prop_native_titlebar (), false)
+      .get (&FirefoxProfile::get_native_titlebar)
+      .set (&FirefoxProfile::set_native_titlebar);
     f.prop (prop_rounded_corners (), false)
       .get (&FirefoxProfile::get_rounded_corners)
       .set (&FirefoxProfile::set_rounded_corners);
@@ -208,6 +212,9 @@ public:
   const char *
   get_theme_name ()
   {
+    if (native_titlebar)
+      return "Titlebar Enabled";
+
     switch (layout)
     {
     case Sf::ButtonLayout::ELEMENTARY:
@@ -230,9 +237,25 @@ public:
       return "macOS";
     case Sf::ButtonLayout::UBUNTU:
       return "Ubuntu";
-    default:
+    case Sf::ButtonLayout::UNKNOWN:
       return "Titlebar Enabled";
     }
+  }
+
+  void
+  set_native_titlebar (bool new_value)
+  {
+    if (native_titlebar == new_value)
+      return;
+
+    native_titlebar = !native_titlebar;
+    notify (prop_native_titlebar ());
+  }
+
+  bool
+  get_native_titlebar ()
+  {
+    return native_titlebar;
   }
 
   void
@@ -261,6 +284,7 @@ public:
   PEEL_PROPERTY (peel::String, theme_sha, "theme-sha");
   PEEL_PROPERTY (ButtonLayout, layout, "layout");
   PEEL_PROPERTY (peel::String, theme_name, "theme_name");
+  PEEL_PROPERTY (bool, native_titlebar, "native-titlebar");
   PEEL_PROPERTY (bool, rounded_corners, "rounded-corners");
 
   void

@@ -19,6 +19,7 @@ ApplicationWindow::Class::init ()
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, update_toast);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, overlaybar);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, content_box);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, titlebar_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, corners_sw);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, install_btn);
@@ -112,6 +113,9 @@ ApplicationWindow::init (Class *)
         );
         binding_group->bind (
           "rounded-corners", corners_sw, "active", peel::GObject::BindingFlags::BIDIRECTIONAL
+        );
+        binding_group->bind (
+          "native-titlebar", titlebar_sw, "active", peel::GObject::BindingFlags::BIDIRECTIONAL
         );
         binded = true;
       }

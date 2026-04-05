@@ -93,6 +93,33 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
                   hexpand: true;
 
                   Gtk.Label {
+                    label: _("Use native titlebar");
+                  }
+                }
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: end;
+
+                  Gtk.Switch titlebar_sw {}
+                }
+              };
+            }
+
+            Granite.ListItem {
+              child: Granite.Box {
+                focusable: false;
+                orientation: horizontal;
+                hexpand: true;
+
+                Granite.Box {
+                  orientation: vertical;
+                  valign: center;
+                  halign: start;
+                  hexpand: true;
+
+                  Gtk.Label {
                     label: _("Rounded corners");
                   }
                 }

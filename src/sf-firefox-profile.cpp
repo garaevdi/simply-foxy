@@ -46,6 +46,7 @@ FirefoxProfile::init (Class *)
 
       profile->set_theme_sha (profile->config->get_string ("theme-sha"));
       profile->set_layout ((ButtonLayout)profile->config->get_int ("button-layout"));
+      profile->set_native_titlebar (profile->config->get_boolean ("native-titlebar"));
       profile->set_rounded_corners (profile->config->get_boolean ("rounded-corners"));
     }
   );
@@ -56,6 +57,7 @@ FirefoxProfile::write_config ()
 {
   config->set_string ("theme-sha", get_theme_sha ());
   config->set_int ("button-layout", static_cast<int> (get_layout ()));
+  config->set_boolean ("native-titlebar", get_native_titlebar ());
   config->set_boolean ("rounded-corners", get_rounded_corners ());
 
   notify (prop_has_theme ());
