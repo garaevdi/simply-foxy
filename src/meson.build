@@ -20,9 +20,12 @@ config_h = configure_file(configuration: config_h_conf, output: 'config.h')
 
 peel_gen = find_program('peel-gen')
 
+env = environment()
+env.append('GI_GIR_PATH', meson.project_source_root() / 'gir')
+
 peel_h = custom_target(
   'peel-codegen',
-  env: { 'GI_GIR_PATH': meson.project_source_root() / 'gir' },
+  env: env,
   command: [
     peel_gen,
     '--recursive',
