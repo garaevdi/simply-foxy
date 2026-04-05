@@ -15,7 +15,6 @@ inline void
 Application::Class::init ()
 {
   Granite::init ();
-  Adw::init ();
   override_vfunc_activate<Application> ();
 }
 

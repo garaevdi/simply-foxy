@@ -2,7 +2,6 @@
 
 #include "config.h"
 
-#include <peel/Adw/Adw.h>
 #include <peel/Gio/Gio.h>
 #include <peel/Granite/Granite.h>
 #include <peel/Gtk/Gtk.h>

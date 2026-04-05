@@ -2,7 +2,6 @@ deps = [
   dependency('gobject-2.0'),
   dependency('glib-2.0'),
   dependency('gtk4'),
-  dependency('libadwaita-1'),
   dependency('granite-7'),
   dependency('libsoup-3.0'),
   dependency('json-glib-1.0'),
@@ -30,7 +29,6 @@ peel_h = custom_target(
     peel_gen,
     '--recursive',
     '--out-dir', '@OUTDIR@',
-    'Adw', '1',
     'Granite', '7.0',
     'Soup', '3.0',
     'Json', '1.0'
