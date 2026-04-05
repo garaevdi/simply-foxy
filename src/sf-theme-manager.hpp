@@ -27,6 +27,7 @@ class ThemeManager final : public peel::GObject::Object
   peel::RefPtr<peel::Gio::Settings> config;
 
   static peel::Signal<ThemeManager, void ()> theme_installed_sig;
+  static peel::Signal<ThemeManager, void ()> theme_uninstalled_sig;
   static peel::Signal<ThemeManager, void ()> update_available_sig;
 
   bool busy;
@@ -122,6 +123,7 @@ class ThemeManager final : public peel::GObject::Object
 
 public:
   PEEL_SIGNAL_CONNECT_METHOD (theme_installed, theme_installed_sig);
+  PEEL_SIGNAL_CONNECT_METHOD (theme_uninstalled, theme_uninstalled_sig);
   PEEL_SIGNAL_CONNECT_METHOD (update_available, update_available_sig);
 
   bool

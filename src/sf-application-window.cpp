@@ -17,6 +17,8 @@ ApplicationWindow::Class::init ()
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, refresh_btn);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, profile_dd);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, update_toast);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, install_toast);
+  PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, uninstall_toast);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, overlaybar);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, content_box);
   PEEL_WIDGET_TEMPLATE_BIND_CHILD (ApplicationWindow, titlebar_sw);
@@ -81,6 +83,12 @@ ApplicationWindow::init (Class *)
   );
   theme_manager->connect_update_available ([this] (peel::GObject::Object *source)
                                            { update_toast->send_notification (); });
+
+  theme_manager->connect_theme_installed ([this] (peel::GObject::Object *source)
+                                          { this->install_toast->send_notification (); });
+
+  theme_manager->connect_theme_uninstalled ([this] (peel::GObject::Object *source)
+                                          { this->uninstall_toast->send_notification (); });
 
   refresh_btn->connect_clicked (
     [this] (Gtk::Button *)

@@ -11,6 +11,7 @@ namespace Sf
 {
 
 Signal<ThemeManager, void ()> ThemeManager::theme_installed_sig;
+Signal<ThemeManager, void ()> ThemeManager::theme_uninstalled_sig;
 Signal<ThemeManager, void ()> ThemeManager::update_available_sig;
 
 PEEL_CLASS_IMPL (ThemeManager, "SfThemeManager", peel::GObject::Object);
@@ -24,6 +25,7 @@ inline void
 ThemeManager::init (Class *)
 {
   theme_installed_sig = Signal<ThemeManager, void ()>::create ("theme-installed");
+  theme_uninstalled_sig = Signal<ThemeManager, void ()>::create ("theme-uninstalled");
   update_available_sig = Signal<ThemeManager, void ()>::create ("update-available");
 
   session = Soup::Session::create ();
@@ -496,6 +498,11 @@ ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
   set_busy (true);
   UniquePtr<GLib::Error> error;
   co_await actually_install_theme (profile, &error);
+  if (error)
+    warning ("%s", error->message);
+  else
+    theme_installed_sig.emit (this);
+
   set_busy (false);
 }
 
@@ -508,6 +515,11 @@ ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
   set_busy (true);
   UniquePtr<GLib::Error> error;
   co_await actually_uninstall_theme (profile, &error);
+  if (error)
+    warning ("%s", error->message);
+  else
+    theme_uninstalled_sig.emit (this);
+
   set_busy (false);
 }
 } // namespace Sf

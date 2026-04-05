@@ -28,6 +28,16 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
       }
 
       [overlay]
+      Granite.Toast install_toast {
+        title: _("Theme installed, don't forget to restart the browser");
+      }
+
+      [overlay]
+      Granite.Toast uninstall_toast {
+      title: _("Theme uninstalled, don't forget to restart the browser");
+      }
+
+      [overlay]
       Granite.OverlayBar overlaybar {}
 
       child: Granite.Box {
