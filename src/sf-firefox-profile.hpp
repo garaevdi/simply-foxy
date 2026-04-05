@@ -83,12 +83,8 @@ class FirefoxProfile final : public peel::GObject::Object
   void
   set_app_name (const char *new_name)
   {
-    if (app_name)
-      if (peel::GLib::str_equal (app_name.c_str (), new_name))
-        return;
-
-    app_name = new_name;
-    notify (prop_app_name ());
+    if (app_name.set (new_name))
+      notify (prop_app_name ());
   }
 
   void
@@ -179,12 +175,8 @@ public:
   void
   set_theme_sha (const char *new_sha)
   {
-    if (theme_sha)
-      if (peel::GLib::str_equal (theme_sha, new_sha))
-        return;
-
-    theme_sha = new_sha;
-    notify (prop_theme_sha ());
+    if (theme_sha.set (new_sha))
+      notify (prop_theme_sha ());
   }
 
   const char *

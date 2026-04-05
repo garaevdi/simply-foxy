@@ -109,23 +109,15 @@ class ThemeManager final : public peel::GObject::Object
   void
   set_downloaded_sha (const char *new_sha)
   {
-    if (downloaded_sha)
-      if (peel::GLib::str_equal (downloaded_sha.c_str (), new_sha))
-        return;
-
-    downloaded_sha = new_sha;
-    notify (prop_downloaded_sha ());
+    if (downloaded_sha.set (new_sha))
+      notify (prop_downloaded_sha ());
   }
 
   void
   set_message (const char *new_message)
   {
-    if (message)
-      if (peel::GLib::str_equal (message.c_str (), new_message))
-        return;
-
-    message = new_message;
-    notify (prop_message ());
+    if (message.set (new_message))
+      notify (prop_message ());
   }
 
 public:
