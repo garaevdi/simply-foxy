@@ -1,6 +1,6 @@
 # Simply Foxy
 
-![Screenshot](data/screenshot.png?raw=true)
+![Screenshot](data/screenshot.png)
 
 Simple gui installer for [elementary OS Firefox Theme](https://github.com/Zonnev/elementaryos-firefox-theme) with some additional options on top. Written in C++ using [peel](https://gitlab.gnome.org/bugaevc/peel).
 
