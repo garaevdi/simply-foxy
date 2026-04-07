@@ -7,6 +7,19 @@
 
 using namespace peel;
 
+PEEL_ENUM_IMPL (
+  Sf::ThemeManagerError, "SfThemeManagerError",
+  PEEL_ENUM_VALUE (Sf::ThemeManagerError::WRONG_RETURN_STATUS_CODE, "Wrong retrun statuscode"),
+  PEEL_ENUM_VALUE (Sf::ThemeManagerError::NO_EXTRACT_DIRECTORY, "No extract directory"),
+  PEEL_ENUM_VALUE (Sf::ThemeManagerError::NO_THEME_DIRECTORY, "No theme directory")
+)
+
+GLib::Quark
+Sf::theme_manager_error_quark ()
+{
+  return "sf-theme-manager-error-quark";
+}
+
 namespace Sf
 {
 
@@ -75,17 +88,17 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
   RefPtr<Gio::InputStream> stream = session->send_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return nullptr;
   }
 
   if (message->get_status () != Soup::Status::OK)
   {
-    internal_error = GLib::Error::create (
-      APP_ID, 1, _ ("Wrong response status code: %d %s"), message->get_status (),
-      message->get_reason_phrase ()
+    GLib::set_error (
+      error, SF_THEME_MANAGER_ERROR,
+      (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE, _ ("Wrong status code : %d %s"),
+      message->get_status (), message->get_reason_phrase ()
     );
-    error = &internal_error;
     co_return nullptr;
   }
 
@@ -125,17 +138,17 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
     = session->send_and_read_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return nullptr;
   }
 
   if (message->get_status () != Soup::Status::OK)
   {
-    internal_error = GLib::Error::create (
-      APP_ID, 1, _ ("Wrong response status code: %d %s"), message->get_status (),
-      message->get_reason_phrase ()
+    GLib::set_error (
+      error, SF_THEME_MANAGER_ERROR,
+      (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE, _ ("Wrong status code : %d %s"),
+      message->get_status (), message->get_reason_phrase ()
     );
-    error = &internal_error;
     co_return nullptr;
   }
 
@@ -151,7 +164,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
     archive->replace_contents_finish (co_await async_result, nullptr, &internal_error);
     if (internal_error)
     {
-      error = &internal_error;
+      GLib::propagate_error (error, std::move (internal_error));
       co_return nullptr;
     }
 
@@ -167,7 +180,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
       = archive->create_finish (co_await async_result, &internal_error);
     if (internal_error)
     {
-      error = &internal_error;
+      GLib::propagate_error (error, std::move (internal_error));
       co_return nullptr;
     }
 
@@ -177,7 +190,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
     stream->write_bytes_finish (co_await async_result, &internal_error);
     if (internal_error)
     {
-      error = &internal_error;
+      GLib::propagate_error (error, std::move (internal_error));
       co_return nullptr;
     }
 
@@ -197,7 +210,7 @@ ThemeManager::extract_archive (RefPtr<Gio::File> archive, UniquePtr<GLib::Error>
   GLib::spawn_command_line_sync (cmd, nullptr, nullptr, nullptr, &internal_error);
   if (internal_error)
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return false;
   }
   else
@@ -218,7 +231,7 @@ ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error)
     extract_dir->trash_finish (co_await async_result, &internal_error);
   }
   if (internal_error)
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
 
   debug ("%s", _ ("Cleanup finished"));
   co_return;
@@ -232,8 +245,10 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
 
   if (!(extract_dir->query_exists (nullptr)))
   {
-    internal_error = GLib::Error::create (APP_ID, 1, "%s", _ ("No extract directory"));
-    error = &internal_error;
+    GLib::set_error (
+      error, SF_THEME_MANAGER_ERROR,
+      (int)ThemeManagerError::NO_EXTRACT_DIRECTORY, _ ("%s"), "No extract directory"
+    );
     co_return nullptr;
   }
   extract_dir->enumerate_children_async (
@@ -244,7 +259,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
     = extract_dir->enumerate_children_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return nullptr;
   }
 
@@ -253,7 +268,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
     = enumerator->next_files_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return nullptr;
   }
 
@@ -278,8 +293,10 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
 
   if (!possible_file)
   {
-    internal_error = GLib::Error::create (APP_ID, 1, "%s", _ ("Couldn't find theme dir"));
-    error = &internal_error;
+    GLib::set_error (
+      error, SF_THEME_MANAGER_ERROR,
+      (int)ThemeManagerError::NO_THEME_DIRECTORY, _ ("%s"), "No theme directory"
+    );
   }
 
   co_return possible_file;
@@ -344,7 +361,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
     chrome->make_directory_finish (co_await async_result, &internal_error);
     if (internal_error)
     {
-      error = &internal_error;
+      GLib::propagate_error (error, std::move (internal_error));
       co_return;
     }
   }
@@ -377,7 +394,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
   }
   if (internal_error) [[unlikely]]
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return;
   }
 
@@ -422,7 +439,7 @@ ThemeManager::actually_uninstall_theme (
   chrome->trash_finish (co_await async_result, &internal_error);
   if (internal_error) [[unlikely]]
   {
-    error = &internal_error;
+    GLib::propagate_error (error, std::move (internal_error));
     co_return;
   }
 

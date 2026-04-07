@@ -16,6 +16,23 @@
 
 namespace Sf
 {
+enum class ThemeManagerError
+{
+  WRONG_RETURN_STATUS_CODE = 0,
+  NO_EXTRACT_DIRECTORY = 1,
+  NO_THEME_DIRECTORY = 2
+};
+
+peel::GLib::Quark
+theme_manager_error_quark ();
+
+#define SF_THEME_MANAGER_ERROR (Sf::theme_manager_error_quark ())
+} // namespace Sf
+
+PEEL_ENUM (Sf::ThemeManagerError)
+
+namespace Sf
+{
 class ThemeManager final : public peel::GObject::Object
 {
   PEEL_SIMPLE_CLASS (ThemeManager, peel::GObject::Object);
@@ -29,7 +46,8 @@ class ThemeManager final : public peel::GObject::Object
   static peel::Signal<ThemeManager, void ()> theme_installed_sig;
   static peel::Signal<ThemeManager, void ()> theme_uninstalled_sig;
   static peel::Signal<ThemeManager, void ()> update_available_sig;
-  static peel::Signal<ThemeManager, void (const char *, const char *, const char *)> show_warning_sig;
+  static peel::Signal<ThemeManager, void (const char *, const char *, const char *)>
+    show_warning_sig;
 
   bool busy;
   bool broken;
