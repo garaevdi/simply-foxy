@@ -16,23 +16,18 @@
 
 namespace Sf
 {
-enum class ThemeManagerError
+enum class ThemeManagerError : int
 {
-  WRONG_RETURN_STATUS_CODE = 0,
-  NO_EXTRACT_DIRECTORY = 1,
-  NO_THEME_DIRECTORY = 2
+  WRONG_RETURN_STATUS_CODE,
+  NO_EXTRACT_DIRECTORY,
+  NO_THEME_DIRECTORY
 };
 
 peel::GLib::Quark
 theme_manager_error_quark ();
 
 #define SF_THEME_MANAGER_ERROR (Sf::theme_manager_error_quark ())
-} // namespace Sf
 
-PEEL_ENUM (Sf::ThemeManagerError)
-
-namespace Sf
-{
 class ThemeManager final : public peel::GObject::Object
 {
   PEEL_SIMPLE_CLASS (ThemeManager, peel::GObject::Object);

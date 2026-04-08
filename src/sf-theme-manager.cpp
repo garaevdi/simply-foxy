@@ -7,21 +7,13 @@
 
 using namespace peel;
 
-PEEL_ENUM_IMPL (
-  Sf::ThemeManagerError, "SfThemeManagerError",
-  PEEL_ENUM_VALUE (Sf::ThemeManagerError::WRONG_RETURN_STATUS_CODE, "Wrong retrun statuscode"),
-  PEEL_ENUM_VALUE (Sf::ThemeManagerError::NO_EXTRACT_DIRECTORY, "No extract directory"),
-  PEEL_ENUM_VALUE (Sf::ThemeManagerError::NO_THEME_DIRECTORY, "No theme directory")
-)
-
+namespace Sf
+{
 GLib::Quark
-Sf::theme_manager_error_quark ()
+theme_manager_error_quark ()
 {
   return "sf-theme-manager-error-quark";
 }
-
-namespace Sf
-{
 
 // clang-format off
 Signal<ThemeManager, void ()> ThemeManager::theme_installed_sig;
@@ -95,9 +87,8 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
   if (message->get_status () != Soup::Status::OK)
   {
     GLib::set_error (
-      error, SF_THEME_MANAGER_ERROR,
-      (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE, _ ("Wrong status code : %d %s"),
-      message->get_status (), message->get_reason_phrase ()
+      error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE,
+      _ ("Wrong status code : %d %s"), message->get_status (), message->get_reason_phrase ()
     );
     co_return nullptr;
   }
@@ -145,9 +136,8 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
   if (message->get_status () != Soup::Status::OK)
   {
     GLib::set_error (
-      error, SF_THEME_MANAGER_ERROR,
-      (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE, _ ("Wrong status code : %d %s"),
-      message->get_status (), message->get_reason_phrase ()
+      error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE,
+      _ ("Wrong status code : %d %s"), message->get_status (), message->get_reason_phrase ()
     );
     co_return nullptr;
   }
@@ -245,9 +235,9 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
 
   if (!(extract_dir->query_exists (nullptr)))
   {
-    GLib::set_error (
-      error, SF_THEME_MANAGER_ERROR,
-      (int)ThemeManagerError::NO_EXTRACT_DIRECTORY, _ ("%s"), "No extract directory"
+    GLib::set_error_literal (
+      error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::NO_EXTRACT_DIRECTORY,
+      _ ("No extract directory")
     );
     co_return nullptr;
   }
@@ -293,9 +283,9 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
 
   if (!possible_file)
   {
-    GLib::set_error (
-      error, SF_THEME_MANAGER_ERROR,
-      (int)ThemeManagerError::NO_THEME_DIRECTORY, _ ("%s"), "No theme directory"
+    GLib::set_error_literal (
+      error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::NO_THEME_DIRECTORY,
+      _ ("No theme directory")
     );
   }
 
