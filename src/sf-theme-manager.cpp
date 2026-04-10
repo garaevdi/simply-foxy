@@ -195,18 +195,20 @@ ThemeManager::extract_archive (
 )
 {
   set_message (_ ("Unpacking theme..."));
-  UniquePtr<GLib::Error> internal_error;
-  String cmd
-    = GLib::strconcat ("unzip -d ", extract_dir->get_path (), " -o ", archive->get_path ());
-  debug (_ ("Unzippign archive with the following cmd: %s"), cmd.c_str ());
-  GLib::spawn_command_line_sync (cmd, nullptr, nullptr, nullptr, &internal_error);
-  if (internal_error)
-  {
-    GLib::propagate_error (error, std::move (internal_error));
+
+  coro::AsyncResult async_result;
+
+  const char *cmd[]{ "unzip", "-d", extract_dir->peek_path (), "-o", archive->peek_path (), nullptr };
+  debug (_ ("Unzippign archive with the following cmd: %s"), GLib::strjoinv (" ", cmd).c_str ());
+  RefPtr<Gio::Subprocess> subprocess
+    = Gio::Subprocess::createv (cmd, Gio::Subprocess::Flags::STDOUT_SILENCE, error);
+  if (!subprocess) [[unlikely]]
     co_return false;
-  }
-  else
-    co_return true;
+
+  subprocess->wait_check_async (cancellable, async_result.callback ());
+  bool success = subprocess->wait_check_finish (co_await async_result, error);
+
+  co_return success;
 }
 
 coro::Future<void>
