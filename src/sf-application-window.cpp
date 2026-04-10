@@ -32,6 +32,7 @@ ApplicationWindow::Class::init ()
 inline void
 ApplicationWindow::init (Class *)
 {
+  cancellable = Gio::Cancellable::create ();
   theme_manager = ThemeManager::create ();
   theme_manager->set_gtk_settings (get_settings ());
   firefox_manager = FirefoxManager::create ();
@@ -99,8 +100,7 @@ ApplicationWindow::init (Class *)
         );
       dialog->set_modal (true);
       dialog->set_transient_for (this);
-      dialog->connect_response ([] (Gtk::Dialog *dialog, int resp_id)
-                                { dialog->destroy (); });
+      dialog->connect_response ([] (Gtk::Dialog *dialog, int resp_id) { dialog->destroy (); });
       dialog->show ();
     }
   );
@@ -108,8 +108,8 @@ ApplicationWindow::init (Class *)
   refresh_btn->connect_clicked (
     [this] (Gtk::Button *)
     {
-      this->firefox_manager->update_profiles ();
-      this->theme_manager->pull_repo ();
+      this->firefox_manager->update_profiles (cancellable);
+      this->theme_manager->pull_repo (cancellable);
     }
   );
 
@@ -145,13 +145,18 @@ ApplicationWindow::init (Class *)
     }
   );
 
-  firefox_manager->update_profiles ();
-  theme_manager->pull_repo ();
+  firefox_manager->update_profiles (cancellable);
+  theme_manager->pull_repo (cancellable);
 }
 
 inline void
 ApplicationWindow::vfunc_dispose ()
 {
+  if (cancellable)
+  {
+    cancellable->cancel ();
+    cancellable = nullptr;
+  }
   dispose_template (Type::of<ApplicationWindow> ());
   parent_vfunc_dispose<ApplicationWindow> ();
 }
@@ -161,7 +166,7 @@ ApplicationWindow::install_btn_clicked_cb (Gtk::Button *btn)
 {
   RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
   if (profile)
-    theme_manager->install_theme (profile);
+    theme_manager->install_theme (profile, cancellable);
 }
 
 void
@@ -169,6 +174,6 @@ ApplicationWindow::uninstall_btn_clicked_cb (Gtk::Button *btn)
 {
   RefPtr<FirefoxProfile> profile = profile_dd->get_selected_item ()->cast<FirefoxProfile> ();
   if (profile)
-    theme_manager->uninstall_theme (profile);
+    theme_manager->uninstall_theme (profile, cancellable);
 }
 } // namespace Sf

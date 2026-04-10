@@ -38,7 +38,7 @@ FirefoxManager::init (Class *)
 }
 
 coro::Future<void>
-FirefoxManager::find_profiles (Firefox fox)
+FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable)
 {
   String path = fox.path;
   String name = fox.name;
@@ -56,7 +56,7 @@ FirefoxManager::find_profiles (Firefox fox)
   UniquePtr<GLib::Error> error;
 
   file->enumerate_children_async (
-    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, nullptr,
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, cancellable,
     async_result.callback ()
   );
   RefPtr<Gio::FileEnumerator> enumerator
@@ -67,7 +67,7 @@ FirefoxManager::find_profiles (Firefox fox)
     co_return;
   }
 
-  enumerator->next_files_async (5, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  enumerator->next_files_async (5, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   UniquePtr<GLib::List> files;
   do
   {
@@ -112,7 +112,7 @@ FirefoxManager::find_profiles (Firefox fox)
     );
   } while (files != nullptr);
 
-  enumerator->close_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  enumerator->close_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   enumerator->close_finish (co_await async_result, &error);
   if (error)
   {
@@ -122,7 +122,7 @@ FirefoxManager::find_profiles (Firefox fox)
 }
 
 coro::SimpleTask
-FirefoxManager::update_profiles ()
+FirefoxManager::update_profiles (RefPtr<Gio::Cancellable> cancellable)
 {
   profiles->remove_all ();
 
@@ -130,7 +130,7 @@ FirefoxManager::update_profiles ()
   futures.reserve (locations.size ());
 
   for (Firefox fox : locations)
-    futures.push_back (find_profiles (fox));
+    futures.push_back (find_profiles (fox, cancellable));
 
   for (auto &future : futures)
     co_await future;

@@ -54,7 +54,7 @@ class FirefoxManager final : public peel::GObject::Object
   init (Class *);
 
   peel::coro::Future<void>
-  find_profiles (Firefox fox);
+  find_profiles (Firefox fox, peel::RefPtr<peel::Gio::Cancellable> cancellable);
 
 public:
   peel::Gio::ListStore *
@@ -66,7 +66,7 @@ public:
   PEEL_PROPERTY (peel::Gio::ListStore, profiles, "profiles");
 
   peel::coro::SimpleTask
-  update_profiles ();
+  update_profiles (peel::RefPtr<peel::Gio::Cancellable> cancellable);
 
   static peel::RefPtr<FirefoxManager>
   create ()

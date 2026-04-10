@@ -77,28 +77,41 @@ class ThemeManager final : public peel::GObject::Object
   init (Class *);
 
   peel::coro::Future<peel::String>
-  get_latest_hash (peel::UniquePtr<peel::GLib::Error> *error);
+  get_latest_hash (
+    peel::UniquePtr<peel::GLib::Error> *error, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::Future<peel::RefPtr<peel::Gio::File>>
-  download_archive (peel::UniquePtr<peel::GLib::Error> *error);
+  download_archive (
+    peel::UniquePtr<peel::GLib::Error> *error, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::Future<bool>
-  extract_archive (peel::RefPtr<peel::Gio::File> file, peel::UniquePtr<peel::GLib::Error> *error);
+  extract_archive (
+    peel::RefPtr<peel::Gio::File> file, peel::UniquePtr<peel::GLib::Error> *error,
+    peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::Future<void>
-  cleanup_data_dir (peel::UniquePtr<peel::GLib::Error> *error);
+  cleanup_data_dir (
+    peel::UniquePtr<peel::GLib::Error> *error, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::Future<peel::RefPtr<peel::Gio::File>>
-  find_theme_dir (peel::UniquePtr<peel::GLib::Error> *error);
+  find_theme_dir (
+    peel::UniquePtr<peel::GLib::Error> *error, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::Future<void>
   actually_install_theme (
-    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error
+    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error,
+    peel::RefPtr<peel::Gio::Cancellable> cancellable
   );
 
   peel::coro::Future<void>
   actually_uninstall_theme (
-    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error
+    peel::RefPtr<FirefoxProfile> profile, peel::UniquePtr<peel::GLib::Error> *error,
+    peel::RefPtr<peel::Gio::Cancellable> cancellable
   );
 
   void
@@ -185,13 +198,17 @@ public:
   PEEL_PROPERTY (peel::Gtk::Settings, gtk_settings, "gtk-settings");
 
   peel::coro::SimpleTask
-  pull_repo ();
+  pull_repo (peel::RefPtr<peel::Gio::Cancellable> cancellable);
 
   peel::coro::SimpleTask
-  install_theme (peel::RefPtr<FirefoxProfile> profile);
+  install_theme (
+    peel::RefPtr<FirefoxProfile> profile, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   peel::coro::SimpleTask
-  uninstall_theme (peel::RefPtr<FirefoxProfile> profile);
+  uninstall_theme (
+    peel::RefPtr<FirefoxProfile> profile, peel::RefPtr<peel::Gio::Cancellable> cancellable
+  );
 
   static peel::RefPtr<ThemeManager>
   create ()

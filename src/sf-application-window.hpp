@@ -15,6 +15,7 @@ class ApplicationWindow final : public peel::Gtk::ApplicationWindow
 {
   PEEL_SIMPLE_CLASS (ApplicationWindow, peel::Gtk::ApplicationWindow);
 
+  peel::RefPtr<peel::Gio::Cancellable> cancellable;
   peel::RefPtr<peel::GObject::BindingGroup> binding_group;
   bool binded;
 

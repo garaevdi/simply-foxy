@@ -61,7 +61,7 @@ ThemeManager::init (Class *)
 }
 
 coro::Future<String>
-ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
+ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancellable> cancellable)
 {
   debug ("%s", _ ("Trying to get latest commit hash"));
   set_message (_ ("Checking for updates..."));
@@ -76,7 +76,7 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> internal_error;
 
-  session->send_async (message, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  session->send_async (message, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   RefPtr<Gio::InputStream> stream = session->send_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
@@ -94,7 +94,7 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
   }
 
   RefPtr<Json::Parser> pareser = Json::Parser::create ();
-  pareser->load_from_stream_async (stream, nullptr, async_result.callback ());
+  pareser->load_from_stream_async (stream, cancellable, async_result.callback ());
   if (!(pareser->load_from_stream_finish (co_await async_result, error)))
     co_return nullptr;
 
@@ -107,7 +107,7 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error)
 }
 
 coro::Future<RefPtr<Gio::File>>
-ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
+ThemeManager::download_archive (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancellable> cancellable)
 {
   set_message (_ ("Downloading theme..."));
   // clang-format off
@@ -124,7 +124,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
   UniquePtr<GLib::Error> internal_error;
 
   debug ("%s", _ ("Sending GET request to github..."));
-  session->send_and_read_async (message, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  session->send_and_read_async (message, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   RefPtr<GLib::Bytes> bytes
     = session->send_and_read_finish (co_await async_result, &internal_error);
   if (internal_error)
@@ -149,7 +149,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
   {
     debug ("%s", _ ("Old archive already exists, trying to overwrite it..."));
     archive->replace_contents_bytes_async (
-      bytes, nullptr, false, Gio::File::CreateFlags::NONE, nullptr, async_result.callback ()
+      bytes, nullptr, false, Gio::File::CreateFlags::NONE, cancellable, async_result.callback ()
     );
     archive->replace_contents_finish (co_await async_result, nullptr, &internal_error);
     if (internal_error)
@@ -164,7 +164,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
   {
     debug ("%s", _ ("Creating new file for archive..."));
     archive->create_async (
-      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, nullptr, async_result.callback ()
+      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, cancellable, async_result.callback ()
     );
     RefPtr<Gio::FileOutputStream> stream
       = archive->create_finish (co_await async_result, &internal_error);
@@ -176,7 +176,7 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
 
     debug ("%s", _ ("File created, trying to write data into it..."));
 
-    stream->write_bytes_async (bytes, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+    stream->write_bytes_async (bytes, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
     stream->write_bytes_finish (co_await async_result, &internal_error);
     if (internal_error)
     {
@@ -190,7 +190,9 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error)
 }
 
 coro::Future<bool>
-ThemeManager::extract_archive (RefPtr<Gio::File> archive, UniquePtr<GLib::Error> *error)
+ThemeManager::extract_archive (
+  RefPtr<Gio::File> archive, UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancellable> cancellable
+)
 {
   set_message (_ ("Unpacking theme..."));
   UniquePtr<GLib::Error> internal_error;
@@ -208,7 +210,7 @@ ThemeManager::extract_archive (RefPtr<Gio::File> archive, UniquePtr<GLib::Error>
 }
 
 coro::Future<void>
-ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error)
+ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancellable> cancellable)
 {
   set_message (_ ("Cleaning old files..."));
   coro::AsyncResult async_result;
@@ -217,7 +219,7 @@ ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error)
   debug ("%s", _ ("Starting data directory cleanup..."));
   if (extract_dir->query_exists (nullptr))
   {
-    extract_dir->trash_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+    extract_dir->trash_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
     extract_dir->trash_finish (co_await async_result, &internal_error);
   }
   if (internal_error)
@@ -228,7 +230,7 @@ ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error)
 }
 
 coro::Future<RefPtr<Gio::File>>
-ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
+ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancellable> cancellable)
 {
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> internal_error;
@@ -242,8 +244,8 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
     co_return nullptr;
   }
   extract_dir->enumerate_children_async (
-    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, nullptr,
-    async_result.callback ()
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT,
+    cancellable, async_result.callback ()
   );
   RefPtr<Gio::FileEnumerator> enumerator
     = extract_dir->enumerate_children_finish (co_await async_result, &internal_error);
@@ -253,7 +255,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
     co_return nullptr;
   }
 
-  enumerator->next_files_async (10, G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  enumerator->next_files_async (10, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   UniquePtr<GLib::List> files
     = enumerator->next_files_finish (co_await async_result, &internal_error);
   if (internal_error)
@@ -278,7 +280,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
     );
   }
 
-  enumerator->close_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  enumerator->close_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   enumerator->close_finish (co_await async_result, &internal_error);
 
   if (!possible_file)
@@ -293,7 +295,10 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error)
 }
 
 coro::Future<void>
-ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<GLib::Error> *error)
+ThemeManager::actually_install_theme (
+  RefPtr<FirefoxProfile> profile, UniquePtr<GLib::Error> *error,
+  RefPtr<Gio::Cancellable> cancellable
+)
 {
   set_message (_ ("Installing theme..."));
   coro::AsyncResult async_result;
@@ -357,28 +362,28 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
   }
 
   userchrome->copy (
-    chrome->get_child ("userChrome.css").release_ref (), Gio::File::CopyFlags::OVERWRITE, nullptr,
-    nullptr, &internal_error
+    chrome->get_child ("userChrome.css").release_ref (), Gio::File::CopyFlags::OVERWRITE,
+    cancellable, nullptr, &internal_error
   );
   usercontent->copy (
-    chrome->get_child ("userContent.css").release_ref (), Gio::File::CopyFlags::OVERWRITE, nullptr,
-    nullptr, &internal_error
+    chrome->get_child ("userContent.css").release_ref (), Gio::File::CopyFlags::OVERWRITE,
+    cancellable, nullptr, &internal_error
   );
   base->copy (
-    chrome->get_child ("base.css").release_ref (), Gio::File::CopyFlags::OVERWRITE, nullptr,
+    chrome->get_child ("base.css").release_ref (), Gio::File::CopyFlags::OVERWRITE, cancellable,
     nullptr, &internal_error
   );
   if (profile->get_sandboxed ())
     flatpak->copy (
-      chrome->get_child ("flatpak.css").release_ref (), Gio::File::CopyFlags::OVERWRITE, nullptr,
-      nullptr, &internal_error
+      chrome->get_child ("flatpak.css").release_ref (), Gio::File::CopyFlags::OVERWRITE,
+      cancellable, nullptr, &internal_error
     );
 
   RefPtr<Gio::File> user_js = profile->get_file ()->get_child ("user.js");
   if (!user_js->query_exists (nullptr))
   {
     user_js->create_async (
-      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, nullptr, async_result.callback ()
+      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, cancellable, async_result.callback ()
     );
     user_js->create_finish (co_await async_result, &internal_error);
   }
@@ -401,7 +406,7 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
     reinterpret_cast<unsigned char *> (const_cast<char *> (conf.c_str ())), strlen (conf)
   };
   user_js->replace_contents_async (
-    buffer, nullptr, false, Gio::File::CreateFlags::REPLACE_DESTINATION, nullptr,
+    buffer, nullptr, false, Gio::File::CreateFlags::REPLACE_DESTINATION, cancellable,
     async_result.callback ()
   );
   user_js->replace_contents_finish (co_await async_result, nullptr, &internal_error);
@@ -414,7 +419,8 @@ ThemeManager::actually_install_theme (RefPtr<FirefoxProfile> profile, UniquePtr<
 
 coro::Future<void>
 ThemeManager::actually_uninstall_theme (
-  RefPtr<FirefoxProfile> profile, UniquePtr<GLib::Error> *error
+  RefPtr<FirefoxProfile> profile, UniquePtr<GLib::Error> *error,
+  RefPtr<Gio::Cancellable> cancellable
 )
 {
   set_message (_ ("Uninstalling theme..."));
@@ -425,7 +431,7 @@ ThemeManager::actually_uninstall_theme (
   UniquePtr<GLib::Error> internal_error;
 
   RefPtr<Gio::File> chrome = profile->get_file ()->get_child ("chrome");
-  chrome->trash_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+  chrome->trash_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   chrome->trash_finish (co_await async_result, &internal_error);
   if (internal_error) [[unlikely]]
   {
@@ -436,7 +442,7 @@ ThemeManager::actually_uninstall_theme (
   RefPtr<Gio::File> user_js = profile->get_file ()->get_child ("user.js");
   if (user_js->query_exists (nullptr))
   {
-    user_js->delete_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+    user_js->delete_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
     user_js->delete_finish (co_await async_result, &internal_error);
   }
 
@@ -447,7 +453,7 @@ ThemeManager::actually_uninstall_theme (
 }
 
 coro::SimpleTask
-ThemeManager::pull_repo ()
+ThemeManager::pull_repo (RefPtr<Gio::Cancellable> cancellable)
 {
   if (busy)
     co_return;
@@ -455,11 +461,11 @@ ThemeManager::pull_repo ()
   set_busy (true);
 
   UniquePtr<GLib::Error> error;
-  String hash = co_await get_latest_hash (&error);
+  String hash = co_await get_latest_hash (&error, cancellable);
   if (error)
     warning (_ ("Couldn't get theme's latest commit hash: %s"), error->message);
 
-  theme_dir = co_await find_theme_dir (&error);
+  theme_dir = co_await find_theme_dir (&error, cancellable);
 
   bool download_needed = false;
 
@@ -475,20 +481,20 @@ ThemeManager::pull_repo ()
 
   if (download_needed)
   {
-    RefPtr<Gio::File> archive = co_await download_archive (&error);
+    RefPtr<Gio::File> archive = co_await download_archive (&error, cancellable);
     if (error || !archive) [[unlikely]]
       critical ("%s", error->message);
 
     set_downloaded_sha (hash);
 
-    co_await cleanup_data_dir (&error);
+    co_await cleanup_data_dir (&error, cancellable);
 
-    co_await extract_archive (archive, &error);
+    co_await extract_archive (archive, &error, cancellable);
     if (error) [[unlikely]]
       critical ("%s", error->message);
 
     // Try to find theme_dir one more time
-    theme_dir = co_await find_theme_dir (&error);
+    theme_dir = co_await find_theme_dir (&error, cancellable);
   }
 
   if (error) [[unlikely]]
@@ -509,14 +515,14 @@ ThemeManager::pull_repo ()
 }
 
 coro::SimpleTask
-ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
+ThemeManager::install_theme (RefPtr<FirefoxProfile> profile, RefPtr<Gio::Cancellable> cancellable)
 {
   if (busy)
     co_return;
 
   set_busy (true);
   UniquePtr<GLib::Error> error;
-  co_await actually_install_theme (profile, &error);
+  co_await actually_install_theme (profile, &error, cancellable);
   if (error)
   {
     warning ("%s", error->message);
@@ -532,14 +538,14 @@ ThemeManager::install_theme (RefPtr<FirefoxProfile> profile)
 }
 
 coro::SimpleTask
-ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile)
+ThemeManager::uninstall_theme (RefPtr<FirefoxProfile> profile, RefPtr<Gio::Cancellable> cancellable)
 {
   if (busy)
     co_return;
 
   set_busy (true);
   UniquePtr<GLib::Error> error;
-  co_await actually_uninstall_theme (profile, &error);
+  co_await actually_uninstall_theme (profile, &error, cancellable);
   if (error)
   {
     warning ("%s", error->message);
