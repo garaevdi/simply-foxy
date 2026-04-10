@@ -56,7 +56,7 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
   UniquePtr<GLib::Error> error;
 
   file->enumerate_children_async (
-    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT, cancellable,
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_LOW, cancellable,
     async_result.callback ()
   );
   RefPtr<Gio::FileEnumerator> enumerator
@@ -70,7 +70,7 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
   UniquePtr<GLib::List> files;
   do
   {
-    enumerator->next_files_async (5, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+    enumerator->next_files_async (5, G_PRIORITY_LOW, cancellable, async_result.callback ());
     files = enumerator->next_files_finish (co_await async_result, &error);
     if (error)
     {
@@ -112,7 +112,7 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
     );
   } while (files != nullptr);
 
-  enumerator->close_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+  enumerator->close_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
   enumerator->close_finish (co_await async_result, &error);
   if (error)
   {

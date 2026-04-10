@@ -76,7 +76,7 @@ ThemeManager::get_latest_hash (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancel
   coro::AsyncResult async_result;
   UniquePtr<GLib::Error> internal_error;
 
-  session->send_async (message, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+  session->send_async (message, G_PRIORITY_LOW, cancellable, async_result.callback ());
   RefPtr<Gio::InputStream> stream = session->send_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
@@ -221,7 +221,7 @@ ThemeManager::cleanup_data_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cance
   debug ("%s", _ ("Starting data directory cleanup..."));
   if (extract_dir->query_exists (nullptr))
   {
-    extract_dir->trash_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+    extract_dir->trash_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
     extract_dir->trash_finish (co_await async_result, &internal_error);
   }
   if (internal_error)
@@ -246,7 +246,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
     co_return nullptr;
   }
   extract_dir->enumerate_children_async (
-    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_DEFAULT,
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_LOW,
     cancellable, async_result.callback ()
   );
   RefPtr<Gio::FileEnumerator> enumerator
@@ -257,7 +257,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
     co_return nullptr;
   }
 
-  enumerator->next_files_async (10, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+  enumerator->next_files_async (10, G_PRIORITY_LOW, cancellable, async_result.callback ());
   UniquePtr<GLib::List> files
     = enumerator->next_files_finish (co_await async_result, &internal_error);
   if (internal_error)
@@ -282,7 +282,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
     );
   }
 
-  enumerator->close_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+  enumerator->close_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
   enumerator->close_finish (co_await async_result, &internal_error);
 
   if (!possible_file)
@@ -354,7 +354,7 @@ ThemeManager::actually_install_theme (
   RefPtr<Gio::File> chrome = profile->get_file ()->get_child ("chrome");
   if (!chrome->query_exists (nullptr))
   {
-    chrome->make_directory_async (G_PRIORITY_DEFAULT, nullptr, async_result.callback ());
+    chrome->make_directory_async (G_PRIORITY_LOW, nullptr, async_result.callback ());
     chrome->make_directory_finish (co_await async_result, &internal_error);
     if (internal_error)
     {
@@ -385,7 +385,7 @@ ThemeManager::actually_install_theme (
   if (!user_js->query_exists (nullptr))
   {
     user_js->create_async (
-      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, cancellable, async_result.callback ()
+      Gio::File::CreateFlags::NONE, G_PRIORITY_LOW, cancellable, async_result.callback ()
     );
     user_js->create_finish (co_await async_result, &internal_error);
   }
@@ -433,7 +433,7 @@ ThemeManager::actually_uninstall_theme (
   UniquePtr<GLib::Error> internal_error;
 
   RefPtr<Gio::File> chrome = profile->get_file ()->get_child ("chrome");
-  chrome->trash_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+  chrome->trash_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
   chrome->trash_finish (co_await async_result, &internal_error);
   if (internal_error) [[unlikely]]
   {
@@ -444,7 +444,7 @@ ThemeManager::actually_uninstall_theme (
   RefPtr<Gio::File> user_js = profile->get_file ()->get_child ("user.js");
   if (user_js->query_exists (nullptr))
   {
-    user_js->delete_async (G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
+    user_js->delete_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
     user_js->delete_finish (co_await async_result, &internal_error);
   }
 
