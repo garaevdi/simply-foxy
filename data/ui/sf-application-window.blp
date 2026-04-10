@@ -15,6 +15,7 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
     [end]
     Gtk.Button refresh_btn {
       icon-name: "view-refresh-symbolic";
+      tooltip-text: _("Check for updates");
     }
   };
 
@@ -34,7 +35,7 @@ template $SfApplicationWindow: Gtk.ApplicationWindow {
 
       [overlay]
       Granite.Toast uninstall_toast {
-      title: _("Theme uninstalled, don't forget to restart the browser");
+        title: _("Theme uninstalled, don't forget to restart the browser");
       }
 
       [overlay]
