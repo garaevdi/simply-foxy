@@ -67,10 +67,10 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
     co_return;
   }
 
-  enumerator->next_files_async (5, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
   UniquePtr<GLib::List> files;
   do
   {
+    enumerator->next_files_async (5, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
     files = enumerator->next_files_finish (co_await async_result, &error);
     if (error)
     {
