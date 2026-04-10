@@ -120,16 +120,33 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cance
   headers->append ("User-Agent", APP_NAME "/" VERSION);
   headers->append ("X-GitHub-Api-Version", "2026-03-10");
 
-  coro::AsyncResult async_result;
   UniquePtr<GLib::Error> internal_error;
+  RefPtr<Gio::Cancellable> file_replace_cancellable = Gio::Cancellable::create ();
+  coro::AsyncResult file_replace_async_result;
 
-  debug ("%s", _ ("Sending GET request to github..."));
-  session->send_and_read_async (message, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
-  RefPtr<GLib::Bytes> bytes
-    = session->send_and_read_finish (co_await async_result, &internal_error);
-  if (internal_error)
+  RefPtr<Gio::File> archive = data_dir->get_child ("elementary-firefox-theme.zip");
+  archive->replace_async (
+    nullptr, false, Gio::File::CreateFlags::NONE, G_PRIORITY_LOW, file_replace_cancellable,
+    file_replace_async_result.callback ()
+  );
+
+  coro::AsyncResult async_result;
+
+  session->send_async (message, G_PRIORITY_LOW, cancellable, async_result.callback ());
+  RefPtr<Gio::InputStream> http_stream
+    = session->send_finish (co_await async_result, &internal_error);
+  if (!http_stream)
   {
-    GLib::propagate_error (error, std::move (internal_error));
+    if (internal_error)
+      GLib::propagate_error (error, std::move (internal_error));
+    else
+      GLib::set_error (
+        error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::FAILED_TO_OPEN_NETWORK_STREAM, "%s",
+        _ ("Failed to open network stream")
+      );
+
+    file_replace_cancellable->cancel ();
+    (void)co_await file_replace_async_result;
     co_return nullptr;
   }
 
@@ -139,53 +156,51 @@ ThemeManager::download_archive (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cance
       error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::WRONG_RETURN_STATUS_CODE,
       _ ("Wrong status code : %d %s"), message->get_status (), message->get_reason_phrase ()
     );
+
+    file_replace_cancellable->cancel ();
+    http_stream->close_async (G_PRIORITY_LOW, nullptr, async_result.callback ());
+    http_stream->close_finish (co_await async_result, nullptr);
+    (void)co_await file_replace_async_result;
     co_return nullptr;
   }
 
-  debug (_ ("Read %zu bytes"), bytes->get_size ());
-
-  RefPtr<Gio::File> archive = data_dir->get_child ("elementary-firefox-theme.zip");
-  if (archive->query_exists (nullptr))
+  RefPtr<Gio::FileOutputStream> file_stream
+    = archive->replace_finish (co_await file_replace_async_result, &internal_error);
+  if (!file_stream)
   {
-    debug ("%s", _ ("Old archive already exists, trying to overwrite it..."));
-    archive->replace_contents_bytes_async (
-      bytes, nullptr, false, Gio::File::CreateFlags::NONE, cancellable, async_result.callback ()
-    );
-    archive->replace_contents_finish (co_await async_result, nullptr, &internal_error);
     if (internal_error)
-    {
       GLib::propagate_error (error, std::move (internal_error));
-      co_return nullptr;
-    }
+    else
+      GLib::set_error (
+        error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::FAILED_TO_SAVE_ARCHIVE, "%s",
+        _ ("Failed to save archive")
+      );
 
-    debug ("%s", _ ("Archive overwritten"));
+    http_stream->close_async (G_PRIORITY_LOW, nullptr, async_result.callback ());
+    http_stream->close_finish (co_await async_result, nullptr);
+    co_return nullptr;
   }
-  else
+
+  file_stream->splice_async (
+    http_stream,
+    Gio::OutputStream::SpliceFlags::CLOSE_SOURCE | Gio::OutputStream::SpliceFlags::CLOSE_TARGET,
+    G_PRIORITY_LOW, cancellable, async_result.callback ()
+  );
+  ssize_t bytes = file_stream->splice_finish (co_await async_result, &internal_error);
+  if (bytes < 0)
   {
-    debug ("%s", _ ("Creating new file for archive..."));
-    archive->create_async (
-      Gio::File::CreateFlags::NONE, G_PRIORITY_DEFAULT, cancellable, async_result.callback ()
-    );
-    RefPtr<Gio::FileOutputStream> stream
-      = archive->create_finish (co_await async_result, &internal_error);
     if (internal_error)
-    {
       GLib::propagate_error (error, std::move (internal_error));
-      co_return nullptr;
-    }
+    else
+      GLib::set_error (
+        error, SF_THEME_MANAGER_ERROR, (int)ThemeManagerError::FAILED_TO_SAVE_ARCHIVE, "%s",
+        _ ("Failed to save archive")
+      );
 
-    debug ("%s", _ ("File created, trying to write data into it..."));
-
-    stream->write_bytes_async (bytes, G_PRIORITY_DEFAULT, cancellable, async_result.callback ());
-    stream->write_bytes_finish (co_await async_result, &internal_error);
-    if (internal_error)
-    {
-      GLib::propagate_error (error, std::move (internal_error));
-      co_return nullptr;
-    }
-
-    debug ("%s", _ ("Data written, archive ready!"));
+    co_return nullptr;
   }
+
+  debug (_ ("Splices %zu bytes"), bytes);
   co_return archive;
 }
 
