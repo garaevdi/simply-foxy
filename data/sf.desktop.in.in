@@ -7,4 +7,4 @@ Icon=@APP_ID@
 Terminal=false
 Type=Application
 Categories=Utility
-X-GNOME_Gettext-Domain=@GETTEXT@
+X-GNOME-Gettext-Domain=@GETTEXT@
