@@ -1,6 +1,8 @@
 #include "sf-theme-manager.hpp"
 
 #include "config.h"
+#include "peel/Gio/File.h"
+#include "peel/RefPtr.h"
 
 #include <glib/gi18n.h>
 #include <string>
@@ -213,7 +215,9 @@ ThemeManager::extract_archive (
 
   coro::AsyncResult async_result;
 
-  const char *cmd[]{ "unzip", "-d", extract_dir->peek_path (), "-o", archive->peek_path (), nullptr };
+  const char *cmd[]{
+    "unzip", "-d", extract_dir->peek_path (), "-o", archive->peek_path (), nullptr
+  };
   debug (_ ("Unzippign archive with the following cmd: %s"), GLib::strjoinv (" ", cmd).c_str ());
   RefPtr<Gio::Subprocess> subprocess
     = Gio::Subprocess::createv (cmd, Gio::Subprocess::Flags::STDOUT_SILENCE, error);
@@ -261,8 +265,8 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
     co_return nullptr;
   }
   extract_dir->enumerate_children_async (
-    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_LOW,
-    cancellable, async_result.callback ()
+    G_FILE_ATTRIBUTE_STANDARD_NAME, Gio::File::QueryInfoFlags::NONE, G_PRIORITY_LOW, cancellable,
+    async_result.callback ()
   );
   RefPtr<Gio::FileEnumerator> enumerator
     = extract_dir->enumerate_children_finish (co_await async_result, &internal_error);
@@ -273,7 +277,7 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
   }
 
   enumerator->next_files_async (10, G_PRIORITY_LOW, cancellable, async_result.callback ());
-  UniquePtr<GLib::List> files
+  GLib::List<RefPtr<Gio::FileInfo>> files
     = enumerator->next_files_finish (co_await async_result, &internal_error);
   if (internal_error)
   {
@@ -282,19 +286,12 @@ ThemeManager::find_theme_dir (UniquePtr<GLib::Error> *error, RefPtr<Gio::Cancell
   }
 
   RefPtr<Gio::File> possible_file = nullptr;
-  if (files)
+  for (auto &file_info : files)
   {
-    GLib::List::foreach (
-      files,
-      [&possible_file, enumerator] (void *data)
-      {
-        RefPtr<Gio::FileInfo> info = (Gio::FileInfo *)data;
-        RefPtr<Gio::File> file = enumerator->get_child (info);
-        std::string name = info->get_name ();
-        if (name.find ("Zonnev-elementaryos-firefox-theme-") != std::string::npos)
-          possible_file = file;
-      }
-    );
+    RefPtr<Gio::File> file = enumerator->get_child (file_info);
+    std::string name = file_info->get_name ();
+    if (name.find ("Zonnev-elementaryos-firefox-theme-") != std::string::npos)
+      possible_file = file;
   }
 
   enumerator->close_async (G_PRIORITY_LOW, cancellable, async_result.callback ());

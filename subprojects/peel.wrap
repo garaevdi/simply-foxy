@@ -1,6 +1,6 @@
 [wrap-git]
 url=https://gitlab.gnome.org/bugaevc/peel.git
-revision=HEAD
+revision=glist
 depth=1
 
 [provide]

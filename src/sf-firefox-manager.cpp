@@ -1,6 +1,7 @@
 #include "sf-firefox-manager.hpp"
 
 #include "log.h"
+#include "peel/Gio/FileInfo.h"
 #include "sf-firefox-profile.hpp"
 
 #include <glib/gi18n.h>
@@ -67,7 +68,7 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
     co_return;
   }
 
-  UniquePtr<GLib::List> files;
+  GLib::List<RefPtr<Gio::FileInfo>> files;
   do
   {
     enumerator->next_files_async (5, G_PRIORITY_LOW, cancellable, async_result.callback ());
@@ -77,40 +78,33 @@ FirefoxManager::find_profiles (Firefox fox, RefPtr<Gio::Cancellable> cancellable
       warning (_ ("Couldn't get files out of enumerator: %s"), error->message);
       continue;
     }
-    GLib::List::foreach (
-      files,
-      [enumerator, &profile_name = name, &path, &sandboxed, profiles = this->profiles] (void *data)
+    for (auto &file_info : files)
+    {
+      RefPtr<Gio::File> file = enumerator->get_child (file_info);
+      std::string file_name = file_info->get_name ();
+
+      if (file_name.find ("default") != std::string::npos)
       {
-        if (!data)
-          return;
-
-        RefPtr<Gio::FileInfo> info = (Gio::FileInfo *)data;
-        RefPtr<Gio::File> file = enumerator->get_child (info);
-        std::string name = info->get_name ();
-
-        if (name.find ("default") != std::string::npos)
+        // Snap firefox stores user settings in a xxxxx.default folder, while other foxes store
+        // user settings in a xxxxx.default-xxxxx folder
+        RefPtr<Gio::File> prefsjs = file->get_child ("prefs.js");
+        if (prefsjs->query_exists (nullptr))
         {
-          // Snap firefox stores user settings in a xxxxx.default folder, while other foxes store
-          // user settings in a xxxxx.default-xxxxx folder
-          RefPtr<Gio::File> prefsjs = file->get_child ("prefs.js");
-          if (prefsjs->query_exists (nullptr))
+          if (file_name.find ("esr") != std::string::npos)
           {
-            if (name.find ("esr") != std::string::npos)
-            {
-              profile_name = GLib::strconcat (profile_name, " ESR");
-            }
-            else if (name.find ("nightly") != std::string::npos)
-            {
-              profile_name = GLib::strconcat (profile_name, " Nightly");
-            }
-            debug (_ ("Found profile %s at %s"), profile_name.c_str (), path.c_str ());
-            RefPtr<FirefoxProfile> profile = FirefoxProfile::create (profile_name, file, sandboxed);
-            profiles->append (profile);
+            name = GLib::strconcat (name, " ESR");
           }
+          else if (file_name.find ("nightly") != std::string::npos)
+          {
+            name = GLib::strconcat (name, " Nightly");
+          }
+          debug (_ ("Found profile %s at %s"), name.c_str (), path.c_str ());
+          RefPtr<FirefoxProfile> profile = FirefoxProfile::create (name, file, sandboxed);
+          profiles->append (profile);
         }
       }
-    );
-  } while (files != nullptr);
+    }
+  } while (files);
 
   enumerator->close_async (G_PRIORITY_LOW, cancellable, async_result.callback ());
   enumerator->close_finish (co_await async_result, &error);
