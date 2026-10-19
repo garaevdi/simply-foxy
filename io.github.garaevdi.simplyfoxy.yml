@@ -1,6 +1,6 @@
 app-id: io.github.garaevdi.simplyfoxy
 runtime: io.elementary.Platform
-runtime-version: "daily"
+runtime-version: "9"
 sdk: io.elementary.Sdk
 command: io.github.garaevdi.simplyfoxy
 finish-args:
